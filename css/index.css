@@ -1,0 +1,43 @@
+body {
+	background: rgb(37, 37, 37);
+	color: white;
+}
+
+#logout {
+	display: inline-flex;
+	float: right;
+}
+
+#logout *{
+	margin: 0;
+	padding: 0;
+}
+
+#logout p,
+#logout button{
+	font-size: 1.3em;
+	margin: 10px 20px 10px 0px;
+	padding: 5px;
+}
+
+#logout button {
+color: black
+}
+
+#menu, #table {
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+#menu {
+	padding-top: 5%;
+	padding-bottom: 0.5%;
+}
+
+.row {
+	margin-bottom: 15px;
+}
+
+#btnAggiorna {
+	float: right;
+}
