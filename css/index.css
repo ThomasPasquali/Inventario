@@ -41,3 +41,43 @@ color: black
 #btnAggiorna {
 	float: right;
 }
+
+#tabella {
+	margin-left: 3%;
+	margin-right: 3%;
+	/*display: none*/
+}
+
+card-header {
+	background: rgb(100, 100, 100);
+	margin: 0 3% 0 3%;
+}
+
+#accordion {
+	background: rgb(37, 37, 37);
+}
+
+.card {
+	border: 0;
+	background: rgb(37, 37, 37);
+}
+
+.card-body {
+	margin: 0;
+	padding: 10px;
+}
+
+.collapse {
+	background: rgb(37, 37, 37);
+}
+
+.inserimento *{
+	display: block;
+	text-align: center;
+}
+
+.inserimento input,
+#btnInserisci {
+	display: block;
+	margin: 0 auto 0 auto;
+}

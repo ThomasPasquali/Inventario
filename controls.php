@@ -7,11 +7,15 @@ class Controls {
 	
 	public $ini = NULL;
 	public $db = NULL;
+	private $schema, $tableOggetti, $tableUtenti;
 	
 	function __construct() {
 		session_start();
 		$this->ini = parse_ini_file(INI_FILE_PATH);
 		$this->db = new DB($this->ini['host'], $this->ini['port'], $this->ini['username'], $this->ini['password'], $this->ini['dbName']);
+		$this->schema = $this->ini['dbName'];
+		$this->tableOggetti = $this->ini['tabOggetti'];
+		$this->tableUtenti = $this->ini['tabUtenti'];
 	}
 	
 	public function redirect($where) {
@@ -30,15 +34,22 @@ class Controls {
 		}
 	}
 	
+	public function savePreferenze($preferenze) {
+		$_SESSION['preferenze'] = [];
+		foreach ($preferenze as $key => $value)
+			$_SESSION['preferenze'][$key] = $value;
+		$this->storePreferenze();
+	}
+	
 	private function loadPreferenze() {
-		$res = $this->db->ql('SELECT Preferenze FROM utenti WHERE Username = ?', [$_SESSION['username']]);
+		$res = $this->db->ql('SELECT Preferenze FROM '.$this->tableUtenti.' WHERE Username = ?', [$_SESSION['username']]);
 		if(count($res) > 0)
 			$_SESSION['preferenze'] = json_decode($res[0]['Preferenze'], TRUE);
 	}
 	
 	private function storePreferenze() {
 		$this->db->dml(
-				'UPDATE utenti SET Preferenze = ? WHERE Username = ?',
+				'UPDATE '.$this->tableUtenti.' SET Preferenze = ? WHERE Username = ?',
 				[json_encode($_SESSION['preferenze']), $_SESSION['username']]);
 	}
 	
@@ -47,7 +58,7 @@ class Controls {
 	}
 	
 	public function login($username, $password) {
-		$res = $this->db->ql('SELECT * FROM utenti WHERE Username = ?', [$username]);
+		$res = $this->db->ql('SELECT * FROM '.$this->tableUtenti.' WHERE Username = ?', [$username]);
 		if(count($res) > 0)
 			if(password_verify($password, $res[0]['Password'])) {
 				$_SESSION['username'] = $username;
@@ -61,9 +72,37 @@ class Controls {
 		session_destroy();
 	}
 	
-	//TODO da ottimizzare
+	public function getColumnDescription($table, $column) {
+		$res = $this->db->ql(
+				'SELECT column_comment AS c
+				FROM information_schema.columns
+				WHERE
+					table_schema = ?
+					AND table_name = ?
+					AND column_name = ?',
+				[$this->schema, $table, $column]);
+		return $res[0]['c']??NULL;
+	}
+	
 	public function describeTable($table) {
-		return $this->db->ql('SHOW FULL COLUMNS FROM '.$table);
+		return $this->db->ql('DESCRIBE '.$table);
+	}
+	
+	public function getNameTableOggetti() {
+		return $this->tableOggetti;
+	}
+	
+	public function getNameTableUtenti() {
+		return $this->tableUtenti;
+	}
+	
+	public function changeSQLtoHTMLtype($sqlType) {
+		if(preg_match('/^([a-z]*int\(.*)|(decimal\(.*)/', $sqlType))
+			return 'number';
+		else if(preg_match('/^date$/', $sqlType))
+			return 'date';
+		else 
+			return 'text';
 	}
 	
 }

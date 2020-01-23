@@ -9,23 +9,36 @@ header('Content-type: application/json');
 switch($_POST['request']??'') {
 	
 	case 'query':
-		//Impostazione preferenze
+		$prefs = [
+			'columns' => [],
+			'max_results' => 0
+		];
+		$matches =[];
+		//Parsing preferenze
 		foreach ($_POST as $key => $value)
-			$c->setPreferenza($key, $value);
+			if(preg_match('/^col_([^;\']*)$/', $key, $matches))
+				$prefs['columns'][] = $matches[1];
+				
+		if(preg_match('/^\d{1,}$/', $_POST['max_results']??'') && intval($_POST['max_results']) > 0)
+			$prefs['max_results'] = intval($_POST['max_results']);
+		
+		//Salvataggio preferenze
+		$c->savePreferenze($prefs);
 			
 		//Creazione SQL
-		$sql = 'SELECT * FROM oggetti';
-		$params = [];
+		$sql = 'SELECT '.implode(', ', $prefs['columns']);
+		$sql .= ' FROM '.$c->getNameTableOggetti();
+		$sql .= ($prefs['max_results'] > 0 ? ' LIMIT '.$prefs['max_results'] : '');		
 		
-		$max_results = $c->getPreferenza('max_results');
-		//TODO filtri
+		//Richiesta dati al DB
+		$dati = $c->db->ql($sql);
 		
-		if(preg_match('/\d{1,}/', $max_results) && $max_results > 0)
-			$sql .= ' LIMIT '.$max_results;
-		
-		//Richiesta al DB e invio dati in JSON
-		$oggetti = $c->db->ql($sql, $params);
-		echo json_encode($oggetti);
+		//Richiesta colonne
+		$colonne = [];
+		foreach ($prefs['columns'] as $colonna)
+			$colonne[] = $c->getColumnDescription($c->getNameTableOggetti(), $colonna);
+		//Invio colonne e dati in JSON
+			echo json_encode(['Dati' => $dati, 'Colonne' => $colonne]);
 		exit();
 	
 	default:

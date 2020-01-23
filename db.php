@@ -12,11 +12,11 @@ class DB extends PDO{
 		if($stmt->errorCode() != 0)
 			return $stmt->errorInfo();
 			
-			$righe = [];
-			while ($riga = $stmt->fetch($fetchType))
-				$righe[] = $riga;
-				
-				return $righe;
+		$righe = [];
+		while ($riga = $stmt->fetch($fetchType))
+			$righe[] = $riga;
+			
+		return $righe;
 	}
 	
 	public function dml($sql, $params=NULL) {
@@ -27,10 +27,10 @@ class DB extends PDO{
 			$stmt->execute($params);
 			
 			if($stmt->errorCode() != 0)
-				return $stmt->errorInfo();
-				
-				$this->commit();
 				return $stmt;
+				
+			$this->commit();
+			return $stmt;
 		}catch (PDOException $e){
 			$this->rollback();
 			throw $e;
