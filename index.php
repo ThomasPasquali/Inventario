@@ -1,21 +1,20 @@
 <?php 
-include_once 'controls.php';
-$c = new Controls();
-
-if(!$c->isLogged()) $c->redirect('login.php');
-
-$colonne = $c->describeTable($c->getNameTableOggetti());
-
-if(isset($_POST['inserimento'])) {
-	unset($_POST['inserimento']);
-	$sql = 'INSERT INTO '.$c->getNameTableOggetti().' ('.implode(',', array_keys($_POST)).') VALUES (?'.str_repeat(',?', count($_POST)-1).')';
-	$values = array_values($_POST);
-	for ($i = 0; $i < count($values); $i++)
-		if(strlen($values[$i]) == 0)
-			$values[$i] = NULL;
-	$resInsert = $c->db->dml($sql, $values);
-}
+	include_once 'controls.php';
+	$c = new Controls();
 	
+	if(!$c->isLogged()) $c->redirect('login.php');
+	
+	$colonne = $c->describeTable($c->getNameTableOggetti());
+	
+	if(isset($_POST['inserimento'])) {
+		unset($_POST['inserimento']);
+		$sql = 'INSERT INTO '.$c->getNameTableOggetti().' ('.implode(',', array_keys($_POST)).') VALUES (?'.str_repeat(',?', count($_POST)-1).')';
+		$values = array_values($_POST);
+		for ($i = 0; $i < count($values); $i++)
+			if(strlen($values[$i]) == 0)
+				$values[$i] = NULL;
+		$resInsert = $c->db->dml($sql, $values);
+	}
 ?>
 <html>
 	<head>
@@ -50,8 +49,8 @@ if(isset($_POST['inserimento'])) {
 		<?php
 		if(isset($resInsert) && $resInsert->errorCode() != 0) {
 		?>
-		<div class="alert alert-error alert-dismissible fade show" role="alert">
-			<strong>Errore nell'inserimento:</strong><?= $resInsert->errorInfo()[2] ?>
+		<div class="alert alert-error alert-dismissible fade show" role="alert" style="color: red;">
+			<strong>Errore nell'inserimento: </strong><?= $resInsert->errorInfo()[2] ?>
 			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 			</button>

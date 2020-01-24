@@ -7,7 +7,7 @@ class Controls {
 	
 	public $ini = NULL;
 	public $db = NULL;
-	private $schema, $tableOggetti, $tableUtenti;
+	private $schema, $tableOggetti, $tableUtenti, $tableImmagini;
 	
 	function __construct() {
 		session_start();
@@ -16,6 +16,7 @@ class Controls {
 		$this->schema = $this->ini['dbName'];
 		$this->tableOggetti = $this->ini['tabOggetti'];
 		$this->tableUtenti = $this->ini['tabUtenti'];
+		$this->tableImmagini = $this->ini['tabImmagini'];
 	}
 	
 	public function redirect($where) {
@@ -94,6 +95,10 @@ class Controls {
 	
 	public function getNameTableUtenti() {
 		return $this->tableUtenti;
+	}
+	
+	public function getNameTableImmagini() {
+		return $this->tableImmagini;
 	}
 	
 	public function changeSQLtoHTMLtype($sqlType) {

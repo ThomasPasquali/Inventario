@@ -1,0 +1,32 @@
+body {
+	background: rgb(37, 37, 37);
+	color: white;
+	padding: 2%;
+}
+
+.container {
+	width: 100%;
+	min-width: 100%;
+	max-width: 100%;
+	margin: 0;
+}
+
+#tabellaDati .row:nth-child(odd) {
+	background-color: rgb(110, 110, 110);
+	padding: 5px;
+	vertical-align: middle;
+}
+
+#immaginePreview img{
+	width: 100%;
+	display: none;
+}
+
+#bottoniFoto button {
+	margin-top: 10px;
+	margin-right: 10px;
+}
+
+#bottoniFoto {
+	margin-bottom: 20px;
+}

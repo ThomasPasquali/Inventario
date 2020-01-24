@@ -15,7 +15,7 @@ switch($_POST['request']??'') {
 		];
 		$matches =[];
 		//Parsing preferenze
-		foreach ($_POST as $key => $value)
+		foreach (array_keys($_POST) as $key)
 			if(preg_match('/^col_([^;\']*)$/', $key, $matches))
 				$prefs['columns'][] = $matches[1];
 				
@@ -39,6 +39,13 @@ switch($_POST['request']??'') {
 			$colonne[] = $c->getColumnDescription($c->getNameTableOggetti(), $colonna);
 		//Invio colonne e dati in JSON
 			echo json_encode(['Dati' => $dati, 'Colonne' => $colonne]);
+		exit();
+		
+	case 'removeImage':
+		$res = $c->db->dml(
+			'DELETE FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ? AND Immagine = ?',
+			[$_POST['oggetto'], $_POST['immagine']]);
+		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
 		exit();
 	
 	default:
