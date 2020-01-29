@@ -4,6 +4,10 @@ body {
 	padding: 2%;
 }
 
+pre {
+	background-color: gray;
+}
+
 .container {
 	width: 100%;
 	min-width: 100%;

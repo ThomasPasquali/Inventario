@@ -38,6 +38,7 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$.getScript("js/misc.js");
+				//$.getScript("js/moment.js");
 			    $.getScript("js/index.js");
 			});
 		</script>
@@ -70,7 +71,7 @@
 			<div class="card">
 				<div class="card-header" id="headingMenu">
 					<h5 class="mb-0">
-						<button class="btn btn-link" data-toggle="collapse" data-target="#collapseMenu" aria-expanded="true" aria-controls="collapseMenu">
+						<button id="menuSelezioneBtn" class="btn btn-link" data-toggle="collapse" data-target="#collapseMenu" aria-expanded="true" aria-controls="collapseMenu">
 							Men&ugrave; selezione
 						</button>
 					</h5>

@@ -2,7 +2,8 @@ for (var i = 0; i < nImmagini; i++)
 	$("#bottoniFoto").append(createImageButton(i));
 
 var selectedIndex = 0;
-$(".bottone").get(0).click();
+if($(".bottone").get(0))
+	$(".bottone").get(0).click();
 
 function createImageButton(n) {
 	let btn = $("<button></button>");
@@ -20,7 +21,7 @@ function createImageButton(n) {
 	return btn;
 }
 
-function removeImage(oggetto, index) {
+function removeImage() {
 	if(nImmagini <= 0) return;
 	let matches = $("#img_"+selectedIndex).attr("src").match(new RegExp('^imgs/(.*)$'));
 	$.ajax({
@@ -30,9 +31,10 @@ function removeImage(oggetto, index) {
 		dataType: "text",
 		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
 	}).done(function(result) {
-		if(result != 'OK')
+		if(result != 'OK') {
+			console.log(result);
 			alert(result);
-		else
+		}else
 			removeSelectedIndex();
 	});
 }
@@ -54,4 +56,16 @@ function removeSelectedIndex() {
 	
 	selectedIndex = 0;
 	if($("#btn_0").length) $("#btn_0").click();
+	
+	if(nImmagini == 0)
+		$('#btnRemoveImg').hide();
 }
+
+/*$('img').each(function() {
+	EXIF.getData(this, function() {
+	    var orientation = EXIF.getTag(this, "Orientation");
+	    console.log(orientation);
+	    if(orientation == 6)
+	        $(this).css('transform', 'rotate(90deg)')
+	});  
+});*/

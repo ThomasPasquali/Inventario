@@ -20,20 +20,8 @@ class DB extends PDO{
 	}
 	
 	public function dml($sql, $params=NULL) {
-		try {
-			$this->beginTransaction();
-			
-			$stmt = $this->prepare($sql);
-			$stmt->execute($params);
-			
-			if($stmt->errorCode() != 0)
-				return $stmt;
-				
-			$this->commit();
-			return $stmt;
-		}catch (PDOException $e){
-			$this->rollback();
-			throw $e;
-		}
+		$stmt = $this->prepare($sql);
+		$stmt->execute($params);
+		return $stmt;
 	}
 }

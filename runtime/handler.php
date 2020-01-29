@@ -33,12 +33,21 @@ switch($_POST['request']??'') {
 		//Richiesta dati al DB
 		$dati = $c->db->ql($sql);
 		
-		//Richiesta colonne
+		/*Richiesta colonne
 		$colonne = [];
 		foreach ($prefs['columns'] as $colonna)
-			$colonne[] = $c->getColumnDescription($c->getNameTableOggetti(), $colonna);
+			$colonne[] = $c->getColumnDescription($c->getNameTableOggetti(), $colonna);*/
 		//Invio colonne e dati in JSON
-			echo json_encode(['Dati' => $dati, 'Colonne' => $colonne]);
+		echo json_encode($dati);//, 'Colonne' => $colonne]);
+		exit();
+		
+	case 'updateValue':
+		$res = $c->db->dml(
+		'UPDATE '.$c->getNameTableOggetti().
+		' SET '.str_replace('/[;\']/', '', $_POST['field']).' = ?'.
+		' WHERE ID = ?',
+		[in_array($_POST['newVal'], ['', '0000-00-00']) ? NULL : $_POST['newVal'], $_POST['oggetto']]);
+		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
 		exit();
 		
 	case 'removeImage':
