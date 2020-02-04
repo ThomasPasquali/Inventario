@@ -3,18 +3,6 @@
 	$c = new Controls();
 	
 	if(!$c->isLogged()) $c->redirect('login.php');
-	
-	$colonne = $c->describeTable($c->getNameTableOggetti());
-	
-	if(isset($_POST['inserimento'])) {
-		unset($_POST['inserimento']);
-		$sql = 'INSERT INTO '.$c->getNameTableOggetti().' ('.implode(',', array_keys($_POST)).') VALUES (?'.str_repeat(',?', count($_POST)-1).')';
-		$values = array_values($_POST);
-		for ($i = 0; $i < count($values); $i++)
-			if(strlen($values[$i]) == 0)
-				$values[$i] = NULL;
-		$resInsert = $c->db->dml($sql, $values);
-	}
 ?>
 <html>
 	<head>
@@ -26,136 +14,92 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 		
 		<!-- JQUERY -->
-		<script type="text/javascript" src="lib/jquery-3.4.1.min.js"></script>
-		<script type="text/javascript" src="lib/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="./lib/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="./lib/jquery-ui-1.12.1/jquery-ui.min.js"></script>
 		
 		<!-- TABULATOR -->
-		<link href="lib/tabulator/dist/css/tabulator.min.css" rel="stylesheet">
-		<script type="text/javascript" src="lib/tabulator/dist/js/tabulator.min.js"></script>
-		<link href="lib/tabulator/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+		<link href="./lib/tabulator/dist/css/tabulator.min.css" rel="stylesheet">
+		<link href="./lib/tabulator/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+		<script type="text/javascript" src="./lib/tabulator/dist/js/tabulator.min.js"></script>
 		
+		<!-- INDEX -->
+		<script defer type="text/javascript" src="./js/misc.js"></script>
+		<script defer type="text/javascript" src="./js/index.js"></script>
 		<link href='css/index.css' rel='stylesheet' type='text/css'>
-		<script type="text/javascript">
-			$(document).ready(function() {
-				$.getScript("js/misc.js");
-				//$.getScript("js/moment.js");
-			    $.getScript("js/index.js");
-			});
-		</script>
 		
-		<title>Inventario Home</title>
+		<title>Inventario</title>
 	</head>
 	<body>
-		
-		<?php
-		if(isset($resInsert) && $resInsert->errorCode() != 0) {
-		?>
-		<div class="alert alert-error alert-dismissible fade show" role="alert" style="color: red;">
-			<strong>Errore nell'inserimento: </strong><?= $resInsert->errorInfo()[2] ?>
-			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
-		<?php 	
-		}
-		?>
-	
-		<div id="logout">
-			<p>Ciao <?= $_SESSION['username'] ?></p>
-			<form action="login.php" method="post">
-				<button type="submit" name="logout" class="btn btn-info">Logout</button>
-			</form>
-		</div>
-		
-		<div id="accordion">
-			<div class="card">
-				<div class="card-header" id="headingMenu">
-					<h5 class="mb-0">
-						<button id="menuSelezioneBtn" class="btn btn-link" data-toggle="collapse" data-target="#collapseMenu" aria-expanded="true" aria-controls="collapseMenu">
-							Men&ugrave; selezione
-						</button>
-					</h5>
-				</div>
-				<div id="collapseMenu" class="collapse show" aria-labelledby="headingMenu" data-parent="#accordion">
-					<div class="card-body">
-						<div id="menu">
-							<form id="form-aggiorna">
-							<input type="hidden"  name="request" value="query">
-							<input type="hidden"  name="col_ID" value="on">
-							
-							<div class="container">
-							
-								<div class="row">
-				    				<div class="col">
-				    					<label># risultati</label>
-										<input type="number" name="max_results" value="<?= $c->getPreferenza('max_results') ?>">
-				    				</div>
-				    				
-				    				<label>Colonne:</label>
-				    				<?php
-											$colonnePreferenze = $c->getPreferenza('columns');
-											$i = 0;
-											foreach ($colonne as $colonna) 
-												if($colonna['Key'] != 'PRI') {
-													if($i % 5 == 0) echo '<div class="col">';
-													$toCheck = is_null($colonnePreferenze);
-													$toCheck = $toCheck || in_array($colonna['Field'], $colonnePreferenze);
-													echo '<div class="custom-control custom-checkbox">';
-													echo '	<input type="checkbox" name="col_'.$colonna['Field'].'" class="custom-control-input" id="col_'.$colonna['Field'].'"'.($toCheck?' checked="checked"':'').'>';
-													echo '	<label class="custom-control-label" for="col_'.$colonna['Field'].'">'.$colonna['Field'].'</label>';
-													echo '</div>';
-													if(($i+1) % 5 == 0) echo '</div>';
-													$i++;
-												}
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-10">
+
+				<button id="btnCollapseMenu" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseMenu" aria-expanded="false" aria-controls="collapseMenu">Men&ugrave;</button>
+				<div class="collapse" id="collapseMenu">
+					<div class="card card-body p-1 m-1">
+						<div class="container-fluid p-1 m-1">
+							<div class="row">
+
+								<div class="col">
+									<button id="btnCollapseColonne" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseColonne" aria-expanded="false" aria-controls="collapseColonne">Colonne</button>
+									<div class="collapse" id="collapseColonne">
+										<div id="colonne" class="card card-body">
+										<?php
+											$cols = $c->describeTable($c->getNameTableOggetti());
+											$prefCols = $c->getPreferenza('columns');
+											foreach($cols as $col)
+												echo "<div class=\"custom-control custom-checkbox\">
+														<input type=\"checkbox\" name=\"$col[Field]\" ".(is_null($prefCols)||in_array($col['Field'], $prefCols)?'checked="checked"':'')." class=\"custom-control-input colonna\" id=\"col$col[Field]\">
+														<label class=\"custom-control-label\" for=\"col$col[Field]\">$col[Field]</label>
+											  		</div>";
 										?>
-				    				
-									<div class="col">
-										<button id="btnAggiorna" type="button" class="btn btn-success">Aggiorna</button>
+										</div>
+									</div>
+								</div>
+
+								<div class="col">
+									<div class="container-fluid">
+										<div class="row">
+											<button type="button" class="btn btn-warning" onclick="printTable();">Stampa dati</button>
+										</div>
+										<div class="row">
+											<button type="button" class="btn btn-warning">Stampa immagini (WIP)</button>
+										</div>
 									</div>
 								</div>
 								
+								<div class="col">
+									<button type="button" class="btn btn-info" onclick="newOggetto();">Nuovo oggetto</button>
+								</div>
+
+								<div class="col">
+									<button id="btnAggiornaTabella" type="button" class="btn btn-success">Aggiorna tabella</button>
+								</div>
+
 							</div>
-							</form>
 						</div>
 					</div>
 				</div>
-			</div>
-			
-			<div class="card">
-				<div class="card-header" id="headingInserimento">
-					<h5 class="mb-0">
-						<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseInserimento" aria-expanded="false" aria-controls="collapseInserimento">
-						Men&ugrave; inserimento
-						</button>
-					</h5>
-				</div>
-				<div id="collapseInserimento" class="collapse" aria-labelledby="headingInserimento" data-parent="#accordion">
-					<div class="card-body">
-						<form action="" method="post">
-							<div class="container">
-								<div class="row">
-				    				<?php
-				    					$i = 0;
-										foreach ($colonne as $colonna)
-											if($colonna['Key'] != 'PRI') {
-												if($i % 5 == 0) echo '<div class="col inserimento">';
-												echo "<label>$colonna[Field]</label><input type=\"".$c->changeSQLtoHTMLtype($colonna['Type'])."\" name=\"$colonna[Field]\">";
-												if(($i+1) % 5 == 0) echo '</div>';
-												$i++;
-											}
-										if($i % 5 != 0) echo '</div>';
-									?>
-				    			</div>
-				    		</div>
-				    		<input id="btnInserisci" type="submit" name="inserimento" value="Inserisci">
-						</form>
-					</div>
-				</div>
-			</div>
-			
-		</div>
 
-		<div id="tabella"></div>
+			</div>
+
+			<div class="col">
+				<div class="float-right">
+					<p class="mr-2">Benvenuto <?= $_SESSION['username'] ?></p>
+					<form action="login.php" method="post">
+						<button type="submit" name="logout" class="btn btn-info">Logout</button>
+					</form>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div id="bottomDiv">
+				<div id="tabella"></div>
+			</div>
+		</div>
+	</div>
 		
 	</body>
 </html>

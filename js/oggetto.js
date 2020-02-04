@@ -1,10 +1,35 @@
-for (var i = 0; i < nImmagini; i++)
-	$("#bottoniFoto").append(createImageButton(i));
+/*********************EVENT HANDLERS***********************/
+function f5(e) {
+	if((e.which || e.keyCode) == 116) {
+		e.preventDefault();
+		window.location.replace('oggetto.php?id='+oggetto);
+	}
+}
+document.addEventListener("keydown", f5);
 
-var selectedIndex = 0;
-if($(".bottone").get(0))
-	$(".bottone").get(0).click();
+$('.etichetta').hover(
+	function(){ $(this).removeClass().addClass('btn btn-danger mr-3 etichetta') },
+	function(){ $(this).removeClass().addClass('btn btn-info mr-3 etichetta') },
+);
 
+$('.etichetta').click(function() {
+	let elem = $(this);
+	$.ajax({
+		url: "runtime/handler.php",
+		type: "POST",
+		data: {"request" : "removeLabel", "oggetto" : oggetto, "etichetta" : $(this).text()},
+		dataType: "text",
+		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+	}).done(function(result) {
+		if(result != 'OK') {
+			console.log(result);
+			alert(result);
+		}else
+			elem.remove();
+	});
+});
+
+/*********************CALL FUNCTIONS***********************/
 function createImageButton(n) {
 	let btn = $("<button></button>");
 	btn.text(n+1);
@@ -61,11 +86,10 @@ function removeSelectedIndex() {
 		$('#btnRemoveImg').hide();
 }
 
-/*$('img').each(function() {
-	EXIF.getData(this, function() {
-	    var orientation = EXIF.getTag(this, "Orientation");
-	    console.log(orientation);
-	    if(orientation == 6)
-	        $(this).css('transform', 'rotate(90deg)')
-	});  
-});*/
+/*********************INIT***********************/
+for (var i = 0; i < nImmagini; i++)
+	$("#bottoniFoto").append(createImageButton(i));
+
+var selectedIndex = 0;
+if($(".bottone").get(0))
+	$(".bottone").get(0).click();

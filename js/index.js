@@ -1,4 +1,4 @@
-//custom max min header filter
+/*********************CUSTOM FILTERS***********************/
 var minMaxFilterEditor = function(cell, onRendered, success, cancel, editorParams){
     var end;
     var container = document.createElement("span");
@@ -32,7 +32,7 @@ var minMaxFilterEditor = function(cell, onRendered, success, cancel, editorParam
     container.appendChild(start);
     container.appendChild(end);
     return container;
- }
+}
 
 //custom max min filter function
 function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams){
@@ -51,14 +51,22 @@ function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams){
     return res; //must return a boolean, true if it passes the filter.
 }
 
+function annoFilterFunction(headerValue, rowValue, rowData, filterParams){
+	if((headerValue.start && !headerValue.start.match(/^\d{4}$/)) || (headerValue.end && !headerValue.end.match(/^\d{4}$/)))
+		return true;
+    return minMaxFilterFunction(headerValue, rowValue && rowValue.length > 4 ? rowValue.split('-')[0] : rowValue, rowData, filterParams);
+}
+
+/*********************TABLE DECLARATION***********************/
+const digitWidth = 3;
 table = new Tabulator("#tabella", {
-	layout:"fitData",
-	height:"80%",
-    layout:"fitColumns",
-    pagination:"local",
+	layout:"fitColumns",
+    /*pagination:"local",
     paginationSize:20,
-    paginationSizeSelector:[10, 20, 30],
-    movableColumns:true,
+    paginationSizeSelector:[10, 20, 30],*/
+	movableColumns:true,
+	printAsHtml:true,
+	printVisibleRows:true,
     cellEdited:function(cell){
     	//console.log(cell);
     	$.ajax({
@@ -71,11 +79,15 @@ table = new Tabulator("#tabella", {
     			'oggetto':cell.getRow().getCell('ID').getValue()
     		},
     		dataType: "text",
-    		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+    		error: function(XMLHttpRequest, textStatus, errorThrown) {
+				console.log(textStatus);
+				console.log(errorThrown);
+			}
     	}).done(function(result) {
     		if(result != 'OK') {
-    			console.log(result);
-    			alert(result);
+				console.log(result);
+				cell.setValue('');
+				showAlert(result, 'danger');
     		}
     	});
      },
@@ -85,8 +97,7 @@ table = new Tabulator("#tabella", {
      	{title:"Larghezza",field:"Larghezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
      	{title:"Altezza",field:"Altezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
      	{title:"Profondita",field:"Profondita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
-     	{title:"Anno",field:"Anno",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"number",headerFilterPlaceholder:"Anno = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:9999", "integer"]},
-     	{title:"Anno valido",field:"Anno_valido",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:true,headerFilterParams:{values:{Y:"Si", N:"No", "<non_specificato>":""}},editor:"select", editorParams:{values:{"":"<non_specificato>","Y":"Si","N":"No"}}},
+     	{title:"Anno",field:"Anno",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:annoFilterFunction,editor:"input",validator:["regex:\\d{4}(-\\d{4})?"]},
      	{title:"Materiale",field:"Materiale",headerFilterPlaceholder:"Materiale...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Proprietà",field:"Proprieta",headerFilterPlaceholder:"Proprietario...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Donatore",field:"Donatore",headerFilterPlaceholder:"Donatore...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
@@ -94,11 +105,18 @@ table = new Tabulator("#tabella", {
      	{title:"Stato",field:"Stato",headerFilterPlaceholder:"Stato...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Valore",field:"Valore",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"Valore = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:999999", "numeric"]},
-     	{title:"",field:"immagini",cellClick:function(e, cell) { modifica(cell) }}
+     	{title:"",field:"Link",cellClick:function(e, cell) { apriPaginaOggetto(cell) }}
      ]
 });
 
-function modifica(cell) {
+/*********************CALL FUNCTIONS***********************/
+function printTable() {
+	table.getColumn('Link').hide();
+	table.print();
+	table.getColumn('Link').show();
+}
+
+function apriPaginaOggetto(cell) {
 	window.open('oggetto.php?id='+cell.getRow().getCells()[0].getValue(), '_blank');
 }
 
@@ -107,33 +125,71 @@ function aggiornaTabella() {
 	$.ajax({
 		url: "runtime/handler.php",
 		type: "POST",
-		data: getFormAsJSON($("#form-aggiorna")),
+		data: {request : "query"},
 		dataType: "json",
-		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log(textStatus);
+			console.log(errorThrown);
+		}
 	}).done(function(result) {
 		 //console.log(result);
-		
-		 /*for (var i = 0; i < result.Colonne.length; i++)
-			 result.Colonne[i] = JSON.parse(result.Colonne[i]);
-		 result.Colonne.push({title:"",field:"modifica",cellClick:function(e, cell){ modifica(cell) }});
-		 
-		 */
-		 
-		 //table.setColumns(result.Colonne);
 		for (var i = 0; i < result.length; i++)
-			 result[i].immagini = "Immagini";
+			 result[i].Link = "Img/Etic";
 		 table.setData(result);
 	});
-	
-	//$('#table').css('display', 'block');
 }
 
-$("#form-aggiorna").submit(function(e){
-	e.preventDefault();
-	$('#menuSelezioneBtn').click();
+function setColumnsPreferences() {
+	let cols = [];
+	$('.colonna:checked').each(function() {
+		cols.push($(this).attr('name'));
+	});
+	if(cols.length > 0)
+		$.ajax({
+			url: "runtime/handler.php",
+			type: "POST",
+			data: {request : "setPreference", name : 'columns', value : cols},
+			dataType: "text",
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				console.log(textStatus);
+				console.log(errorThrown);
+			}
+		});
+}
+
+function newOggetto() {
+	$.ajax({
+		url: "runtime/handler.php",
+		type: "POST",
+		data: {request : "newOggetto"},
+		dataType: "json",
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log(textStatus);
+			console.log(errorThrown);
+		}
+	}).done(function(res) {
+		if(res.status != 'OK')	showAlert(res.error, 'danger');
+		else					table.addRow(res.record, true);
+	});
+}
+
+/*********************EVENT HANDLERS***********************/
+$('#btnAggiornaTabella').click(function(){
+	$('#btnCollapseMenu').click();
 	aggiornaTabella();
 });
-$('#btnAggiorna').click(function(){
-	$('#menuSelezioneBtn').click();
-	aggiornaTabella();
+
+$(`.colonna`).click(function() {
+	if(table.getColumn($(this).attr('name')).getVisibility())
+		table.getColumn($(this).attr('name')).hide();
+	else
+		table.getColumn($(this).attr('name')).show();
+	setColumnsPreferences();
+});
+
+/*********************INIT***********************/
+$('#btnAggiornaTabella').click();
+$('.colonna').each(function() {
+	if(!$(this).is(':checked'))
+		table.getColumn($(this).attr('name')).hide();
 });

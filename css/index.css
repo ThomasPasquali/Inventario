@@ -1,11 +1,9 @@
 body {
 	background: rgb(37, 37, 37);
 	color: white;
-}
-
-#logout {
-	display: inline-flex;
-	float: right;
+	padding: 1%;
+	max-height: 100%;
+    height: 100%;
 }
 
 #logout *{
@@ -16,68 +14,21 @@ body {
 #logout p,
 #logout button{
 	font-size: 1.3em;
-	margin: 10px 20px 10px 0px;
 	padding: 5px;
 }
 
+#logout p {
+	padding-right: 15px;
+}
+
 #logout button {
-color: black
-}
-
-#menu, #table {
-	padding-left: 5%;
-	padding-right: 5%;
-}
-
-#menu {
-	padding-top: 5%;
-	padding-bottom: 0.5%;
+	color: black
 }
 
 .row {
 	margin-bottom: 15px;
 }
 
-#btnAggiorna {
-	float: right;
-}
-
-#tabella {
-	margin-left: 3%;
-	margin-right: 3%;
-	/*display: none*/
-}
-
-card-header {
-	background: rgb(100, 100, 100);
-	margin: 0 3% 0 3%;
-}
-
-#accordion {
-	background: rgb(37, 37, 37);
-}
-
-.card {
-	border: 0;
-	background: rgb(37, 37, 37);
-}
-
-.card-body {
-	margin: 0;
-	padding: 10px;
-}
-
-.collapse {
-	background: rgb(37, 37, 37);
-}
-
-.inserimento *{
-	display: block;
-	text-align: center;
-}
-
-.inserimento input,
-#btnInserisci {
-	display: block;
-	margin: 0 auto 0 auto;
+#colonne {
+	color: black;
 }

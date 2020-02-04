@@ -13,15 +13,25 @@
 	}
 	
 	if(!$c->isLogged()) $c->redirect('login.php');
+
 	if(isset($_REQUEST['id']))
 		$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' WHERE ID = ?', [$_REQUEST['id']]);
+		
 	if(!isset($_REQUEST['id']) || count($oggetto) < 1) {
 		echo 'Fornire un valido paramentro id';
 		exit();
 	}
+
+	if(!empty($_POST['etichetta']??NULL)) {
+		$res = $c->db->dml(
+			'INSERT INTO '.$c->getNameTableEtichette().'(Oggetto, Etichetta) VALUES(?,?)',
+			[$_POST['id'], $_POST['etichetta']]);
+		echo ($res->errorCode() == 0) ? '' : '<pre>'.$res->errorInfo()[2].'</pre>';
+	}
+
 	$oggetto = $oggetto[0];
 	$immagini = $c->db->ql('SELECT Immagine AS i FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ?', [$_REQUEST['id']]);
-
+	$etichette = $c->db->ql('SELECT Etichetta AS e FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ?', [$_REQUEST['id']]);
 ?>
 <html>
 	<head>
@@ -31,13 +41,11 @@
 		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	
-		<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-	
 		<script type="text/javascript" src="lib/jquery-3.4.1.min.js"></script>
-		<script type="text/javascript">
-			$(document).ready(function() { $.getScript("js/oggetto.js"); $.getScript("js/misc.js"); });
-		</script>
-		<link href='css/oggetto.css' rel='stylesheet' type='text/css'>
+
+		<script defer type="text/javascript" src="./js/misc.js"></script>
+		<script defer type="text/javascript" src="./js/oggetto.js"></script>
+		<link href='./css/oggetto.css' rel='stylesheet' type='text/css'>
 		<title>Oggetto #<?= $_REQUEST['id']?></title>
 	</head>
 	<body>
@@ -49,7 +57,7 @@
 					<div id="tabellaDati" class="container">
 						<?php 
 						foreach ($oggetto as $col => $val)
-							echo "<div class=\"row\"><div class=\"col\"><h5>$col:</h5></div><div class=\"col\"><h5><strong>$val</strong></h5></div></div>";
+							echo "<div class=\"row\"><div class=\"col\"><h5>$col:</h5></div><div class=\"col\"><h5><strong style=\"word-break: break-all;\">$val</strong></h5></div></div>";
 						?>
 					</div>
 					
@@ -78,11 +86,10 @@
 								</div>
 							</div>
 							<div class="col">
-								<form action="" method="POST" enctype="multipart/form-data">
+								<form id="formImmagine" action="" method="POST" enctype="multipart/form-data">
 									<input type="hidden" name="request" value="addImage">
 									<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
-									<input type="file" name="image" value="Aggiungi immagine"><br>
-									<input type="submit" value="Invia">
+									<input type="file" name="image" value="Aggiungi immagine" onchange = "document.getElementById('formImmagine').submit();">
 								</form>
 							</div>
 						</div>
@@ -91,6 +98,24 @@
 					
 				</div>
 			</div>
+
+			<div class="row align-items-center mt-5">
+				<div class="col">
+					<h3>Etichette: </h3>
+				<?php
+					foreach ($etichette as $etichetta)
+						echo "<button type=\"button\" class=\"btn mr-3 btn-info etichetta\">$etichetta[e]</button>";
+				?>
+				</div>
+				<div class="col">
+					<form action="" method="POST">
+						<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
+						<label>Nuova etichetta:</label>
+						<input type="text" name="etichetta" required>
+					</form>
+				</div>
+			</div>
+
 		</div>
 	</body>
 </html>

@@ -7,7 +7,8 @@ class Controls {
 	
 	public $ini = NULL;
 	public $db = NULL;
-	private $schema, $tableOggetti, $tableUtenti, $tableImmagini;
+	private $schema, $tableOggetti, $tableUtenti, $tableImmagini, $tableEtichette;
+	private $alerts = [];
 	
 	function __construct() {
 		session_start();
@@ -17,6 +18,7 @@ class Controls {
 		$this->tableOggetti = $this->ini['tabOggetti'];
 		$this->tableUtenti = $this->ini['tabUtenti'];
 		$this->tableImmagini = $this->ini['tabImmagini'];
+		$this->tableEtichette = $this->ini['tabEtichette'];
 	}
 	
 	public function redirect($where) {
@@ -100,6 +102,10 @@ class Controls {
 	public function getNameTableImmagini() {
 		return $this->tableImmagini;
 	}
+
+	public function getNameTableEtichette() {
+		return $this->tableEtichette;
+	}
 	
 	public function changeSQLtoHTMLtype($sqlType) {
 		if(preg_match('/^([a-z]*int\(.*)|(decimal\(.*)/', $sqlType))
@@ -108,6 +114,18 @@ class Controls {
 			return 'date';
 		else 
 			return 'text';
+	}
+
+	/**
+	 * @param $type Can be secondary, success, danger, warning, info, light, dark
+	 */
+	public function addAlert(string $message, string $type = 'primary'){
+		$this->alerts[] = "showAlert('$message', '$type');";
+	}
+
+	public function getJSforAlerts(){
+		if(!empty($this->alerts))
+			return '<script>$(document).ready(function() {'.implode(' ', $this->alerts).'});</script>';
 	}
 	
 }

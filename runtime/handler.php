@@ -9,36 +9,8 @@ header('Content-type: application/json');
 switch($_POST['request']??'') {
 	
 	case 'query':
-		$prefs = [
-			'columns' => [],
-			'max_results' => 0
-		];
-		$matches =[];
-		//Parsing preferenze
-		foreach (array_keys($_POST) as $key)
-			if(preg_match('/^col_([^;\']*)$/', $key, $matches))
-				$prefs['columns'][] = $matches[1];
-				
-		if(preg_match('/^\d{1,}$/', $_POST['max_results']??'') && intval($_POST['max_results']) > 0)
-			$prefs['max_results'] = intval($_POST['max_results']);
-		
-		//Salvataggio preferenze
-		$c->savePreferenze($prefs);
-			
-		//Creazione SQL
-		$sql = 'SELECT '.implode(', ', $prefs['columns']);
-		$sql .= ' FROM '.$c->getNameTableOggetti();
-		$sql .= ($prefs['max_results'] > 0 ? ' LIMIT '.$prefs['max_results'] : '');		
-		
-		//Richiesta dati al DB
-		$dati = $c->db->ql($sql);
-		
-		/*Richiesta colonne
-		$colonne = [];
-		foreach ($prefs['columns'] as $colonna)
-			$colonne[] = $c->getColumnDescription($c->getNameTableOggetti(), $colonna);*/
-		//Invio colonne e dati in JSON
-		echo json_encode($dati);//, 'Colonne' => $colonne]);
+		$dati = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti());
+		echo json_encode($dati);
 		exit();
 		
 	case 'updateValue':
@@ -54,7 +26,30 @@ switch($_POST['request']??'') {
 		$res = $c->db->dml(
 			'DELETE FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ? AND Immagine = ?',
 			[$_POST['oggetto'], $_POST['immagine']]);
+		if ($res->errorCode() == 0) {
+			echo 'OK';
+			unlink(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.$c->ini['imgsDir'].DIRECTORY_SEPARATOR.$_POST['immagine']);
+		}else
+			echo $res->errorInfo()[2];
+		exit();
+
+	case 'removeLabel':
+		$res = $c->db->dml(
+			'DELETE FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ? AND Etichetta = ?',
+			[$_POST['oggetto'], $_POST['etichetta']]);
 		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
+		exit();
+
+	case 'setPreference':
+		$c->setPreferenza($_POST['name'], $_POST['value']);
+		exit();
+
+	case 'newOggetto':
+		$res = $c->db->dml('INSERT INTO oggetti VALUES ()');
+		if($res->errorCode() == 0)
+			echo json_encode(['status' => 'OK', 'record' => $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' ORDER BY ID DESC LIMIT 1')[0]]);
+		else
+			echo json_encode(['status' => 'ERROR', 'error' => $res->errorInfo()[2]]);
 		exit();
 	
 	default:
