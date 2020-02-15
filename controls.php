@@ -1,7 +1,7 @@
 <?php
 include_once 'db.php';
 
-define('INI_FILE_PATH', __DIR__.'\..\inventario.ini');
+define('INI_FILE_PATH', __DIR__.'/../inventario.ini');
 
 class Controls {
 	

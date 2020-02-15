@@ -3,9 +3,12 @@
 	$c = new Controls();
 	
 	if(isset($_FILES['image'])) {
-		move_uploaded_file(
+		$moved = move_uploaded_file(
 				$_FILES['image']['tmp_name'],
 				$c->ini['imgsDir'].'/'.$_FILES['image']['name']);
+		if(!$moved)
+			echo 'Not uploaded because of error #'.$_FILES['image']['error'];
+
 		$res = $c->db->dml(
 				'INSERT INTO '.$c->getNameTableImmagini().'(Oggetto, Immagine) VALUES(?,?)',
 				[$_POST['id'], $_FILES['image']['name']]);
