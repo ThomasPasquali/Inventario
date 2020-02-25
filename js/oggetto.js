@@ -1,15 +1,15 @@
 /*********************EVENT HANDLERS***********************/
-function f5(e) {
-	if((e.which || e.keyCode) == 116) {
-		e.preventDefault();
+function f5(e = null) {
+	if(e == null || (e.which || e.keyCode) == 116) {
+		if(e != null) e.preventDefault();
 		window.location.replace('oggetto.php?id='+oggetto);
 	}
 }
 document.addEventListener("keydown", f5);
 
 $('.etichetta').hover(
-	function(){ $(this).removeClass().addClass('btn btn-danger mr-3 etichetta') },
-	function(){ $(this).removeClass().addClass('btn btn-info mr-3 etichetta') },
+	function(){ $(this).removeClass().addClass('mr-3 bg-danger etichetta') },
+	function(){ $(this).removeClass().addClass('mr-3 bg-secondary etichetta') },
 );
 
 $('.etichetta').click(function() {
@@ -25,8 +25,25 @@ $('.etichetta').click(function() {
 			console.log(result);
 			alert(result);
 		}else
-			elem.remove();
+			f5();
 	});
+});
+
+$('#fieldEtichetta').keyup(function() {
+	let search = $(this).val().toUpperCase();
+	$('.hint-etichetta').each(function() {
+		$(this).css('display', ($(this).html().toUpperCase().indexOf(search) > -1 ? 'block' : 'none'));
+	});
+});
+
+$('.hint-etichetta').click(function() {
+	$('#fieldEtichetta').val($(this).html());
+	$('#formEtichette').submit();
+});
+
+$('#formElimina input[type=button]').click(function(e) {
+	if(confirm('Sei sicuro di voler eliminare l\'oggetto?'))
+		$('#formElimina').submit();
 });
 
 /*********************CALL FUNCTIONS***********************/

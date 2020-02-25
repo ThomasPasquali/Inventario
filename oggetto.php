@@ -1,6 +1,25 @@
 <?php 
 	include_once 'controls.php';
 	$c = new Controls();
+
+	if(!$c->isLogged()) $c->redirect('login.php');
+
+	if(isset($_REQUEST['id']))
+		$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' WHERE ID = ?', [$_REQUEST['id']]);
+		
+	if(!isset($_REQUEST['id']) || count($oggetto) < 1) {
+		echo '<pre>Fornire un valido paramentro id</pre>';
+		exit();
+	}
+
+	if(isset($_REQUEST['elimina'])) {
+		$res = $c->db->dml('DELETE FROM '.$c->getNameTableOggetti().' WHERE ID = ?', [$_REQUEST['id']]);
+		if($res->errorCode() == 0) {
+			echo '<script>window.close();</script>';
+			exit();
+		}else 
+			echo'<pre>'.$res->errorInfo()[2].'</pre>';
+	}
 	
 	if(isset($_FILES['image'])) {
 		$moved = move_uploaded_file(
@@ -14,17 +33,6 @@
 				[$_POST['id'], $_FILES['image']['name']]);
 		echo ($res->errorCode() == 0) ? '' : '<pre>'.$res->errorInfo()[2].'</pre>';
 	}
-	
-	if(!$c->isLogged()) $c->redirect('login.php');
-
-	if(isset($_REQUEST['id']))
-		$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' WHERE ID = ?', [$_REQUEST['id']]);
-		
-	if(!isset($_REQUEST['id']) || count($oggetto) < 1) {
-		echo 'Fornire un valido paramentro id';
-		exit();
-	}
-
 	if(!empty($_POST['etichetta']??NULL)) {
 		$res = $c->db->dml(
 			'INSERT INTO '.$c->getNameTableEtichette().'(Oggetto, Etichetta) VALUES(?,?)',
@@ -35,6 +43,12 @@
 	$oggetto = $oggetto[0];
 	$immagini = $c->db->ql('SELECT Immagine AS i FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ?', [$_REQUEST['id']]);
 	$etichette = $c->db->ql('SELECT Etichetta AS e FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ?', [$_REQUEST['id']]);
+	$etichette_tot = $c->db->ql(
+		'SELECT DISTINCT Etichetta AS e 
+		FROM '.$c->getNameTableEtichette().
+		' WHERE Etichetta NOT IN 
+			(SELECT Etichetta FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ?)',
+		[$_REQUEST['id']]);
 ?>
 <html>
 	<head>
@@ -52,7 +66,21 @@
 		<title>Oggetto #<?= $_REQUEST['id']?></title>
 	</head>
 	<body>
-		<button onclick="window.close();" style="margin-bottom: 15px;">Indietro</button>
+		<div class="container mb-1">
+			<div class="row">
+				<div class="col">
+					<button onclick="window.close();">Indietro</button>
+				</div>
+				<div class="col">
+					<form id="formElimina" action="" method="POST">
+						<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
+						<input type="hidden" name="elimina">
+						<input type="button" value="Elimina oggetto">
+					</form>
+				</div>
+			</div>
+		</div>
+
 		<div class="container">
 			<div class="row align-items-center">
 				<div class="col-md-4">
@@ -90,6 +118,7 @@
 							</div>
 							<div class="col">
 								<form id="formImmagine" action="" method="POST" enctype="multipart/form-data">
+									<h3>Aggiungi immagine:</h3>
 									<input type="hidden" name="request" value="addImage">
 									<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
 									<input type="file" name="image" value="Aggiungi immagine" onchange = "document.getElementById('formImmagine').submit();">
@@ -104,19 +133,48 @@
 
 			<div class="row align-items-center mt-5">
 				<div class="col">
-					<h3>Etichette: </h3>
+					<h3>Etichette</h3>
 				<?php
-					foreach ($etichette as $etichetta)
-						echo "<button type=\"button\" class=\"btn mr-3 btn-info etichetta\">$etichetta[e]</button>";
+					if(count($etichette) == 0)
+						echo '<h4>Nessuna etichetta associata</h4>';
+					else {
+						echo '<blockquote class="blockquote text-center">';
+						foreach ($etichette as $etichetta)
+							echo "<p class=\"mr-3 bg-secondary etichetta\">$etichetta[e]</p>";
+						echo '</blockquote>';
+					}
 				?>
 				</div>
+
 				<div class="col">
-					<form action="" method="POST">
+					<h3>Nuova etichetta</h3>
+					<form id="formEtichette" action="" method="POST">
 						<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
-						<label>Nuova etichetta:</label>
-						<input type="text" name="etichetta" required>
+						<div class="container">
+							<div class="row">
+								<div class="col">
+									<input id="fieldEtichetta" type="text" name="etichetta" required>
+									<input type="submit" value="Aggiungi">
+								</div>
+							</div>
+							<div class="col">
+								<div class="row">
+									<div id="hints-etichette" class="list-group">
+									<?php
+										if(count($etichette_tot) != 0){
+											echo '<blockquote class="blockquote text-center">';
+											foreach ($etichette_tot as $etichetta)
+												echo "<button type=\"button\" class=\"list-group-item list-group-item-action hint-etichetta\">$etichetta[e]</button>";
+											echo '</blockquote>';
+										}
+									?>
+									</div>
+								</div>
+							</div>
+						</div>
 					</form>
 				</div>
+
 			</div>
 
 		</div>

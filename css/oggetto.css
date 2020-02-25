@@ -34,3 +34,12 @@ pre {
 #bottoniFoto {
 	margin-bottom: 20px;
 }
+
+#hints-etichette {
+	max-height: 250px;
+	overflow: scroll;
+}
+
+div::-webkit-scrollbar {
+	display: none;
+}

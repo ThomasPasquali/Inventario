@@ -103,7 +103,8 @@ table = new Tabulator("#tabella", {
      	{title:"Donatore",field:"Donatore",headerFilterPlaceholder:"Donatore...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Data donazione",field:"Data_donazione",headerFilterPlaceholder:"Data donazione...",align:"center",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",sorterParams:{alignEmptyValues:"bottom"},editor:"input",validator:["regex:\\d{4}-\\d{2}-\\d{2}"]},
      	{title:"Stato",field:"Stato",headerFilterPlaceholder:"Stato...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
+		{title:"Quantit&agrave;",field:"Quantita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",headerFilterPlaceholder:"Quantità = ?",editor:"number",validator:["min:1", "max:99999", "integer"]},
+		{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Valore",field:"Valore",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"Valore = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:999999", "numeric"]},
      	{title:"",field:"Link",cellClick:function(e, cell) { apriPaginaOggetto(cell) }}
      ]
@@ -134,7 +135,7 @@ function aggiornaTabella() {
 	}).done(function(result) {
 		 //console.log(result);
 		for (var i = 0; i < result.length; i++)
-			 result[i].Link = "Img/Etic";
+			 result[i].Link = "Altro";
 		 table.setData(result);
 	});
 }
@@ -186,6 +187,8 @@ $(`.colonna`).click(function() {
 		table.getColumn($(this).attr('name')).show();
 	setColumnsPreferences();
 });
+
+$(window).focus(function() { $('#btnAggiornaTabella').click(); });
 
 /*********************INIT***********************/
 $('#btnAggiornaTabella').click();
