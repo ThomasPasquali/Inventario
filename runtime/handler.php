@@ -9,7 +9,7 @@ header('Content-type: application/json');
 switch($_POST['request']??'') {
 	
 	case 'query':
-		$dati = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti());
+		$dati = $c->db->ql('SELECT * FROM oggetti_view');
 		echo json_encode($dati);
 		exit();
 		
@@ -35,7 +35,7 @@ switch($_POST['request']??'') {
 
 	case 'removeLabel':
 		$res = $c->db->dml(
-			'DELETE FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ? AND Etichetta = ?',
+			'DELETE FROM '.$c->getNameTableEtichetteOggetti().' WHERE Oggetto = ? AND Etichetta = (SELECT ID FROM '.$c->getNameTableEtichette().' WHERE Nome = ?)',
 			[$_POST['oggetto'], $_POST['etichetta']]);
 		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
 		exit();
@@ -50,6 +50,18 @@ switch($_POST['request']??'') {
 			echo json_encode(['status' => 'OK', 'record' => $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' ORDER BY ID DESC LIMIT 1')[0]]);
 		else
 			echo json_encode(['status' => 'ERROR', 'error' => $res->errorInfo()[2]]);
+		exit();
+
+	case 'getColoriOggetto':
+		$res = $c->db->ql('SELECT Colore AS c FROM etichette_oggetti WHERE Oggetto = ?', [$_POST['oggetto']]);
+		echo json_encode($res);
+		exit();
+
+	case 'addEtichettaToOggetto':
+		$res = $c->db->dml(
+			'INSERT INTO '.$c->getNameTableEtichetteOggetti().'(Oggetto, Etichetta) 
+			VALUES(?, (SELECT ID FROM '.$c->getNameTableEtichette().' WHERE Nome = ?))', [$_POST['oggetto'], $_POST['nomeEtichetta']]);
+		echo json_encode($res);
 		exit();
 	
 	default:

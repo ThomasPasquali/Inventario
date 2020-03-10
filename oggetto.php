@@ -35,19 +35,22 @@
 	}
 	if(!empty($_POST['etichetta']??NULL)) {
 		$res = $c->db->dml(
-			'INSERT INTO '.$c->getNameTableEtichette().'(Oggetto, Etichetta) VALUES(?,?)',
-			[$_POST['id'], $_POST['etichetta']]);
+			'INSERT INTO '.$c->getNameTableEtichette().'(Nome, Colore) VALUES(?,?)',
+			[$_POST['etichetta'], $_POST['colore']]);
 		echo ($res->errorCode() == 0) ? '' : '<pre>'.$res->errorInfo()[2].'</pre>';
 	}
 
 	$oggetto = $oggetto[0];
 	$immagini = $c->db->ql('SELECT Immagine AS i FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ?', [$_REQUEST['id']]);
-	$etichette = $c->db->ql('SELECT Etichetta AS e FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ?', [$_REQUEST['id']]);
+	$etichette = $c->db->ql(
+		'SELECT e.Nome, e.Colore 
+		FROM '.$c->getNameTableEtichetteOggetti().' eo 
+		JOIN '.$c->getNameTableEtichette().' e ON e.ID = eo.Etichetta
+		WHERE eo.Oggetto = ?', [$_REQUEST['id']]);
 	$etichette_tot = $c->db->ql(
-		'SELECT DISTINCT Etichetta AS e 
-		FROM '.$c->getNameTableEtichette().
-		' WHERE Etichetta NOT IN 
-			(SELECT Etichetta FROM '.$c->getNameTableEtichette().' WHERE Oggetto = ?)',
+		'SELECT * FROM '.$c->getNameTableEtichette().
+		' WHERE ID NOT IN 
+			(SELECT Etichetta FROM '.$c->getNameTableEtichetteOggetti().' WHERE Oggetto = ?)',
 		[$_REQUEST['id']]);
 ?>
 <html>
@@ -59,6 +62,7 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	
 		<script type="text/javascript" src="lib/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="lib/jscolor.js"></script>
 
 		<script defer type="text/javascript" src="./js/misc.js"></script>
 		<script defer type="text/javascript" src="./js/oggetto.js"></script>
@@ -140,39 +144,47 @@
 					else {
 						echo '<blockquote class="blockquote text-center">';
 						foreach ($etichette as $etichetta)
-							echo "<p class=\"mr-3 bg-secondary etichetta\">$etichetta[e]</p>";
+							echo "<p class=\"mr-3 etichetta\"  style=\"background-color: #$etichetta[Colore];\">$etichetta[Nome]</p>";
 						echo '</blockquote>';
 					}
 				?>
 				</div>
 
 				<div class="col">
-					<h3>Nuova etichetta</h3>
-					<form id="formEtichette" action="" method="POST">
-						<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
-						<div class="container">
-							<div class="row">
-								<div class="col">
-									<input id="fieldEtichetta" type="text" name="etichetta" required>
-									<input type="submit" value="Aggiungi">
+					<div class="container">
+						<div class="row">
+							<div class="col">
+								<h3>Etichette esistenti</h3>
+								<div id="hints-etichette" class="list-group">
+								<?php
+									if(count($etichette_tot) != 0){
+										echo '<blockquote class="blockquote text-center">';
+										foreach ($etichette_tot as $etichetta)
+											echo "<button type=\"button\" style=\"background-color: #$etichetta[Colore];\" class=\"list-group-item list-group-item-action hint-etichetta\">$etichetta[Nome]</button>";
+										echo '</blockquote>';
+									}
+								?>
 								</div>
 							</div>
 							<div class="col">
-								<div class="row">
-									<div id="hints-etichette" class="list-group">
-									<?php
-										if(count($etichette_tot) != 0){
-											echo '<blockquote class="blockquote text-center">';
-											foreach ($etichette_tot as $etichetta)
-												echo "<button type=\"button\" class=\"list-group-item list-group-item-action hint-etichetta\">$etichetta[e]</button>";
-											echo '</blockquote>';
-										}
-									?>
+								<h3>Nuova etichetta</h3>
+								<form id="formEtichette" action="" method="POST">
+									<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
+									<div class="container">
+										<div class="row" style="margin-bottom: 15px;">
+											Nome: <input id="fieldEtichetta" type="text" name="etichetta" required>
+										</div>
+										<div class="row" style="margin-bottom: 15px;">
+											Colore: <input class="jscolor" name="colore" value="FFFFFF">
+										</div>
+										<div class="row">
+											<input type="submit" value="Aggiungi">
+										</div>
 									</div>
-								</div>
+								</form>
 							</div>
 						</div>
-					</form>
+					</div>
 				</div>
 
 			</div>

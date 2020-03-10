@@ -68,7 +68,6 @@ table = new Tabulator("#tabella", {
 	printAsHtml:true,
 	printVisibleRows:true,
     cellEdited:function(cell){
-    	//console.log(cell);
     	$.ajax({
     		url: "runtime/handler.php",
     		type: "POST",
@@ -92,6 +91,7 @@ table = new Tabulator("#tabella", {
     	});
      },
      columns:[
+		{field:"Colori", visible:false},
      	{title:"ID",field:"ID",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"ID = ?",headerFilterFunc:"="},
      	{title:"Descrizione",field:"Descrizione",headerFilterPlaceholder:"Descrizione...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Larghezza",field:"Larghezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
@@ -102,7 +102,7 @@ table = new Tabulator("#tabella", {
      	{title:"Proprietà",field:"Proprieta",headerFilterPlaceholder:"Proprietario...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Donatore",field:"Donatore",headerFilterPlaceholder:"Donatore...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Data donazione",field:"Data_donazione",headerFilterPlaceholder:"Data donazione...",align:"center",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",sorterParams:{alignEmptyValues:"bottom"},editor:"input",validator:["regex:\\d{4}-\\d{2}-\\d{2}"]},
-     	{title:"Stato",field:"Stato",headerFilterPlaceholder:"Stato...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
+     	{title:"Stato",field:"Stato",headerFilterPlaceholder:"Stato...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input", editor:"select", editorParams:{values:["Buono","Usurato","Pessimo"]}},
 		{title:"Quantit&agrave;",field:"Quantita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",headerFilterPlaceholder:"Quantità = ?",editor:"number",validator:["min:1", "max:99999", "integer"]},
 		{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Valore",field:"Valore",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"Valore = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:999999", "numeric"]},
@@ -133,10 +133,20 @@ function aggiornaTabella() {
 			console.log(errorThrown);
 		}
 	}).done(function(result) {
-		 //console.log(result);
+		//console.log(result);
 		for (var i = 0; i < result.length; i++)
 			 result[i].Link = "Altro";
 		 table.setData(result);
+		 for (var row of table.getRows()) {
+			let colori = row.getCell('Colori').getValue()
+			if(colori) {
+				colori = colori.split(',');
+				if(colori.length == 1)
+					row.getCell('ID').getElement().style.backgroundColor = colori[0];
+				else
+					row.getCell('ID').getElement().style.backgroundImage = `linear-gradient(to right, ${colori.join(', ')})`;
+			}
+		 }
 	});
 }
 
@@ -188,10 +198,8 @@ $(`.colonna`).click(function() {
 	setColumnsPreferences();
 });
 
-$(window).focus(function() { $('#btnAggiornaTabella').click(); });
-
 /*********************INIT***********************/
-$('#btnAggiornaTabella').click();
+aggiornaTabella();
 $('.colonna').each(function() {
 	if(!$(this).is(':checked'))
 		table.getColumn($(this).attr('name')).hide();

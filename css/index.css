@@ -32,3 +32,10 @@ body {
 #colonne {
 	color: black;
 }
+
+div.tabulator-cell[tabulator-field="ID"] {
+	-webkit-text-fill-color: white; /* Will override color (regardless of order) */
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;
+	font-weight: 900;
+}

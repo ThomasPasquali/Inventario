@@ -7,7 +7,7 @@ class Controls {
 	
 	public $ini = NULL;
 	public $db = NULL;
-	private $schema, $tableOggetti, $tableUtenti, $tableImmagini, $tableEtichette;
+	private $schema, $tableOggetti, $tableUtenti, $tableImmagini, $tableEtichette, $tableEtichetteOggetti, $viewOggetti;
 	private $alerts = [];
 	
 	function __construct() {
@@ -19,6 +19,8 @@ class Controls {
 		$this->tableUtenti = $this->ini['tabUtenti'];
 		$this->tableImmagini = $this->ini['tabImmagini'];
 		$this->tableEtichette = $this->ini['tabEtichette'];
+		$this->tableEtichetteOggetti = $this->ini['tabEtichetteOggetti'];
+		$this->viewOggetti = $this->ini['viewOggetti'];
 	}
 	
 	public function redirect($where) {
@@ -105,6 +107,14 @@ class Controls {
 
 	public function getNameTableEtichette() {
 		return $this->tableEtichette;
+	}
+
+	public function getNameTableEtichetteOggetti() {
+		return $this->tableEtichetteOggetti;
+	}
+
+	public function getNameViewOggetti() {
+		return $this->viewOggetti;
 	}
 	
 	public function changeSQLtoHTMLtype($sqlType) {

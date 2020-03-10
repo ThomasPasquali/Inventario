@@ -9,7 +9,7 @@ document.addEventListener("keydown", f5);
 
 $('.etichetta').hover(
 	function(){ $(this).removeClass().addClass('mr-3 bg-danger etichetta') },
-	function(){ $(this).removeClass().addClass('mr-3 bg-secondary etichetta') },
+	function(){ $(this).removeClass().addClass('mr-3 etichetta') },
 );
 
 $('.etichetta').click(function() {
@@ -37,8 +37,12 @@ $('#fieldEtichetta').keyup(function() {
 });
 
 $('.hint-etichetta').click(function() {
-	$('#fieldEtichetta').val($(this).html());
-	$('#formEtichette').submit();
+	$.ajax({
+		url: "runtime/handler.php",
+		type: "POST",
+		data: {"request" : "addEtichettaToOggetto", "oggetto" : $('#formEtichette input[name="id"]').val(), "nomeEtichetta" : $(this).html()},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+	}).done(function() { window.location.reload(); });
 });
 
 $('#formElimina input[type=button]').click(function(e) {
