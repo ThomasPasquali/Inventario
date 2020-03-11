@@ -46,9 +46,11 @@ switch($_POST['request']??'') {
 
 	case 'newOggetto':
 		$res = $c->db->dml('INSERT INTO oggetti VALUES ()');
-		if($res->errorCode() == 0)
-			echo json_encode(['status' => 'OK', 'record' => $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' ORDER BY ID DESC LIMIT 1')[0]]);
-		else
+		if($res->errorCode() == 0) {
+			$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' ORDER BY ID DESC LIMIT 1')[0];
+			$oggetto['Link'] = 'Altro';
+			echo json_encode(['status' => 'OK', 'record' => $oggetto]);
+		} else
 			echo json_encode(['status' => 'ERROR', 'error' => $res->errorInfo()[2]]);
 		exit();
 

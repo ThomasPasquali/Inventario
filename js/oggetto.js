@@ -46,7 +46,7 @@ $('.hint-etichetta').click(function() {
 });
 
 $('#formElimina input[type=button]').click(function(e) {
-	if(confirm('Sei sicuro di voler eliminare l\'oggetto?'))
+	if(confirm('Sei sicuro di voler eliminare l\'oggetto e tutti i suoi collegamenti con etichette ed immagini?'))
 		$('#formElimina').submit();
 });
 

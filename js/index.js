@@ -106,7 +106,7 @@ table = new Tabulator("#tabella", {
 		{title:"Quantit&agrave;",field:"Quantita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",headerFilterPlaceholder:"Quantità = ?",editor:"number",validator:["min:1", "max:99999", "integer"]},
 		{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Valore",field:"Valore",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"Valore = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:999999", "numeric"]},
-     	{title:"",field:"Link",cellClick:function(e, cell) { apriPaginaOggetto(cell) }}
+     	{title:"",field:"Link",cellClick:function(e, cell) { apriPaginaOggetto(cell); }}
      ]
 });
 
@@ -118,7 +118,7 @@ function printTable() {
 }
 
 function apriPaginaOggetto(cell) {
-	window.open('oggetto.php?id='+cell.getRow().getCells()[0].getValue(), '_blank');
+	window.open('oggetto.php?id='+cell.getRow().getCell('ID').getValue(), '_blank');
 }
 
 function aggiornaTabella() {
@@ -196,6 +196,10 @@ $(`.colonna`).click(function() {
 	else
 		table.getColumn($(this).attr('name')).show();
 	setColumnsPreferences();
+});
+
+$(window).focus(function(e) {
+	aggiornaTabella();
 });
 
 /*********************INIT***********************/
