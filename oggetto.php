@@ -155,15 +155,20 @@
 						<div class="row">
 							<div class="col">
 								<h3>Etichette esistenti</h3>
+								
 								<div id="hints-etichette" class="list-group">
-								<?php
-									if(count($etichette_tot) != 0){
-										echo '<blockquote class="blockquote text-center">';
-										foreach ($etichette_tot as $etichetta)
-											echo "<button type=\"button\" style=\"background-color: #$etichetta[Colore];\" class=\"list-group-item list-group-item-action hint-etichetta\">$etichetta[Nome]</button>";
-										echo '</blockquote>';
-									}
-								?>
+									<?php
+										if(count($etichette_tot) != 0){
+											echo '<blockquote class="blockquote text-center">';
+											foreach ($etichette_tot as $etichetta) {
+												echo '<div style="display:flex;">';
+												echo "<button type=\"button\" style=\"background-color: #$etichetta[Colore];\" class=\"list-group-item list-group-item-action hint-etichetta\">$etichetta[Nome]</button>";
+												echo '<button type="button" class="btn btn-danger" onclick="deleteLabel('.$etichetta['ID'].')">Elimina</button>';
+												echo '</div>';
+											}
+											echo '</blockquote>';
+										}
+									?>
 								</div>
 							</div>
 							<div class="col">

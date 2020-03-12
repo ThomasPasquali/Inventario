@@ -65,6 +65,12 @@ switch($_POST['request']??'') {
 			VALUES(?, (SELECT ID FROM '.$c->getNameTableEtichette().' WHERE Nome = ?))', [$_POST['oggetto'], $_POST['nomeEtichetta']]);
 		echo json_encode($res);
 		exit();
+
+	case 'deleteLabel':
+		$res = $c->db->dml(
+			'DELETE FROM '.$c->getNameTableEtichette().' WHERE ID = ?', [$_POST['etichetta']]);
+		echo $res->errorCode() == 0 ? 'OK' : $res->errorInfo()[2];
+		exit();
 	
 	default:
 		echo json_encode(NULL);

@@ -85,14 +85,15 @@ table = new Tabulator("#tabella", {
     	}).done(function(result) {
     		if(result != 'OK') {
 				console.log(result);
-				cell.setValue('');
+				cell.restoreOldValue();
 				showAlert(result, 'danger');
     		}
     	});
      },
      columns:[
 		{field:"Colori", visible:false},
-     	{title:"ID",field:"ID",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"ID = ?",headerFilterFunc:"="},
+		{title:"ID",field:"ID",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"ID = ?",headerFilterFunc:"="},
+		{title:"Codice",field:"Codice",sorter:"string",headerFilter:"input",sorter:"string",headerFilterPlaceholder:"Codice = ?",editor:"input"},
      	{title:"Descrizione",field:"Descrizione",headerFilterPlaceholder:"Descrizione...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
      	{title:"Larghezza",field:"Larghezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
      	{title:"Altezza",field:"Altezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
@@ -142,9 +143,9 @@ function aggiornaTabella() {
 			if(colori) {
 				colori = colori.split(',');
 				if(colori.length == 1)
-					row.getCell('ID').getElement().style.backgroundColor = colori[0];
+					row.getCell('Codice').getElement().style.backgroundColor = colori[0];
 				else
-					row.getCell('ID').getElement().style.backgroundImage = `linear-gradient(to right, ${colori.join(', ')})`;
+					row.getCell('Codice').getElement().style.backgroundImage = `linear-gradient(to right, ${colori.join(', ')})`;
 			}
 		 }
 	});

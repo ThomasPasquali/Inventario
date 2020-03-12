@@ -85,6 +85,23 @@ function removeImage() {
 	});
 }
 
+function deleteLabel(id) {
+	if(confirm('Sei sicuro di voler eliminare l\'etichetta e tutti i suoi collegamenti con gli oggetti?'))
+		$.ajax({
+			url: "runtime/handler.php",
+			type: "POST",
+			data: {"request" : "deleteLabel", "etichetta" :id},
+			dataType: "text",
+			error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+		}).done(function(result) {
+			if(result != 'OK') {
+				console.log(result);
+				alert(result);
+			}else
+				window.location.reload();
+		});
+}
+
 function removeSelectedIndex() {
 	$("#img_"+selectedIndex).remove();
 	$("#btn_"+selectedIndex).remove();
