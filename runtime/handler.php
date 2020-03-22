@@ -9,7 +9,17 @@ header('Content-type: application/json');
 switch($_POST['request']??'') {
 	
 	case 'query':
-		$dati = $c->db->ql('SELECT * FROM oggetti_view');
+		$etichetta = $_POST['options']['etichetta']??NULL;
+		if($etichetta)
+			$dati = $c->db->ql(
+				'SELECT ow.*
+				FROM oggetti_view ow
+				JOIN etichette_oggetti eo ON eo.Oggetto = ow.ID
+				WHERE eo.Etichetta = ?',
+				[$etichetta]
+			);
+		else
+			$dati = $c->db->ql('SELECT * FROM oggetti_view');
 		echo json_encode($dati);
 		exit();
 		
@@ -19,6 +29,21 @@ switch($_POST['request']??'') {
 		' SET '.str_replace('/[;\']/', '', $_POST['field']).' = ?'.
 		' WHERE ID = ?',
 		[in_array($_POST['newVal'], ['', '0000-00-00']) ? NULL : $_POST['newVal'], $_POST['oggetto']]);
+		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
+		exit();
+
+	case 'updateOggetto':
+		$first = TRUE;
+		$values = [];
+		$sql = 'UPDATE '.$c->getNameTableOggetti().' SET ';
+		foreach ($_POST['oggetto'] as $field => $value) {
+			$sql .= (!$first?',':'').str_replace('/[;\']/', '', $field).' = ?';
+			$values[] = in_array($value, ['0000-00-00', '', 'null'])?NULL:$value;
+			$first = FALSE;
+		}
+		$sql .= ' WHERE ID = ?';
+		$values[] = $values[0];
+		$res = $c->db->dml($sql, $values);
 		echo ($res->errorCode() == 0) ? 'OK' : $res->errorInfo()[2];
 		exit();
 		

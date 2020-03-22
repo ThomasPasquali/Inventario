@@ -1,41 +1,86 @@
-body {
-	background: rgb(37, 37, 37);
-	color: white;
-	padding: 1%;
-	max-height: 100%;
-    height: 100%;
+:root {
+	--bg-1: #1b262c;
+	--bg-2: #0f4c75;
+	--bg-3: #3282b8;
+	--bg-4: #bbe1fa;
+	--font-color-1: #ffffff;
 }
 
-#logout *{
+body {
+	background: var(--bg-1);
+	padding: 10px;
+	font-family: 'proxima nova', 'helvetica neue';
+	font-size: 1.1rem;
+}
+
+.h-spaced-flex {
+	display: flex;
+	justify-content: space-between;
+}
+
+#navbar {
+	position: relative;
+	top: 0;
+	z-index: 10;
+	padding: 10px;
+	background-color: var(--bg-2);
+}
+
+#navbar * {
 	margin: 0;
 	padding: 0;
 }
 
-#logout p,
-#logout button{
-	font-size: 1.3em;
-	padding: 5px;
+#navbar h1 {
+	font-size: 1.3rem;
+	cursor: pointer;
+	user-select: none;
+	color: var(--font-color-1);
 }
 
-#logout p {
-	padding-right: 15px;
+#navbar-targets > div {
+	display: none;
+	background-color: var(--bg-3);
+	padding: 10px;
+}
+#navbar-targets > div *{
+	font-size: 1.1rem;
 }
 
-#logout button {
-	color: black
+#navbar-targets > div button,
+#navbar-targets > div select{
+	width: fit-content;
 }
 
-.row {
-	margin-bottom: 15px;
+#navbar-targets > div[data-value="filtri"] {
+	grid-template-columns: auto;
 }
 
-#colonne {
-	color: black;
+#navbar-targets > div[data-value="colonne"] {
+	grid-template-columns: repeat(4, auto);
 }
 
-div.tabulator-cell[tabulator-field="ID"] {
-	-webkit-text-fill-color: white; /* Will override color (regardless of order) */
-	-webkit-text-stroke-width: 1px;
-	-webkit-text-stroke-color: black;
-	font-weight: 900;
+div.tabulator-cell[tabulator-field="Codice"] {
+	--border-color: #000000;
+	text-shadow: 2px 0 0 var(--border-color), -2px 0 0 var(--border-color), 0 2px 0 var(--border-color), 0 -2px 0 var(--border-color), 1px 1px var(--border-color), -1px -1px 0 var(--border-color), 1px -1px 0 var(--border-color), -1px 1px 0 var(--border-color);
+}
+
+.elements-centered {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}
+
+#loading {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
+#tabella {
+	visibility: hidden;
+}
+
+div[tabulator-field="Link"] a {
+	color:white;
 }

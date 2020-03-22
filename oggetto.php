@@ -76,6 +76,12 @@
 					<button onclick="window.close();">Indietro</button>
 				</div>
 				<div class="col">
+					<button onclick="precedenteOggetto();">Precedente</button>
+				</div>
+				<div class="col">
+					<button onclick="prossimoOggetto();">Prossimo</button>
+				</div>
+				<div class="col">
 					<form id="formElimina" action="" method="POST">
 						<input type="hidden" name="id" value="<?= $_REQUEST['id']?>">
 						<input type="hidden" name="elimina">
@@ -89,10 +95,13 @@
 			<div class="row align-items-center">
 				<div class="col-md-4">
 				
-					<div id="tabellaDati" class="container">
-						<?php 
-						foreach ($oggetto as $col => $val)
-							echo "<div class=\"row\"><div class=\"col\"><h5>$col:</h5></div><div class=\"col\"><h5><strong style=\"word-break: break-all;\">$val</strong></h5></div></div>";
+					<div id="tabellaDati">
+						<?php
+						foreach ($oggetto as $col => $val) {
+							echo "<h5>$col:</h5>";
+							if($col == 'ID') echo "<h5 name=\"$col\">$val</h5>";
+							else			 echo "<textarea name=\"$col\">$val</textarea>";
+						}
 						?>
 					</div>
 					

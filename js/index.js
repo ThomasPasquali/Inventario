@@ -1,56 +1,3 @@
-/*********************CUSTOM FILTERS***********************/
-var minMaxFilterEditor = function(cell, onRendered, success, cancel, editorParams){
-    var end;
-    var container = document.createElement("span");
-    //create and style inputs
-    var start = document.createElement("input");
-    start.setAttribute("type", "number");
-    start.setAttribute("placeholder", "Min");
-    start.setAttribute("min", 0);
-    start.style.padding = "4px";
-    start.style.width = "50%";
-    start.style.boxSizing = "border-box";
-    start.value = cell.getValue();
-    function buildValues(){
-        success({
-            start:start.value,
-            end:end.value,
-        });
-    }
-    function keypress(e){
-        if(e.keyCode == 13) buildValues();
-        if(e.keyCode == 27) cancel();
-    }
-    end = start.cloneNode();
-    end.setAttribute("placeholder", "Max");
-    start.addEventListener("change", buildValues);
-    start.addEventListener("blur", buildValues);
-    start.addEventListener("keydown", keypress);
-    end.addEventListener("change", buildValues);
-    end.addEventListener("blur", buildValues);
-    end.addEventListener("keydown", keypress);
-    container.appendChild(start);
-    container.appendChild(end);
-    return container;
-}
-
-//custom max min filter function
-function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams){
-	let res = (!headerValue.start && !headerValue.end);
-	rowValue = parseInt(rowValue);
-    if(rowValue > 0) {
-        if(headerValue.start != "")
-            if(headerValue.end != "")
-                res = (rowValue >= headerValue.start && rowValue <= headerValue.end);
-            else
-                res = (rowValue >= headerValue.start);
-        else if(headerValue.end != "")
-                res = (rowValue <= headerValue.end);
-        //console.log("min: "+headerValue.start+" max: "+headerValue.end+" val: "+rowValue+" res: "+res);
-    }
-    return res; //must return a boolean, true if it passes the filter.
-}
-
 function annoFilterFunction(headerValue, rowValue, rowData, filterParams){
 	if((headerValue.start && !headerValue.start.match(/^\d{4}$/)) || (headerValue.end && !headerValue.end.match(/^\d{4}$/)))
 		return true;
@@ -61,9 +8,7 @@ function annoFilterFunction(headerValue, rowValue, rowData, filterParams){
 const digitWidth = 3;
 table = new Tabulator("#tabella", {
 	layout:"fitColumns",
-    /*pagination:"local",
-    paginationSize:20,
-    paginationSizeSelector:[10, 20, 30],*/
+	headerSort:false,
 	movableColumns:true,
 	printAsHtml:true,
 	printVisibleRows:true,
@@ -92,42 +37,73 @@ table = new Tabulator("#tabella", {
      },
      columns:[
 		{field:"Colori", visible:false},
-		{title:"ID",field:"ID",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"ID = ?",headerFilterFunc:"="},
-		{title:"Codice",field:"Codice",sorter:"string",headerFilter:"input",sorter:"string",headerFilterPlaceholder:"Codice = ?",editor:"input"},
-     	{title:"Descrizione",field:"Descrizione",headerFilterPlaceholder:"Descrizione...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Larghezza",field:"Larghezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
-     	{title:"Altezza",field:"Altezza",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
-     	{title:"Profondita",field:"Profondita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:minMaxFilterFunction,editor:"number",validator:["min:1", "max:99999", "integer"]},
-     	{title:"Anno",field:"Anno",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:minMaxFilterEditor,headerFilterFunc:annoFilterFunction,editor:"input",validator:["regex:\\d{4}(-\\d{4})?"]},
-     	{title:"Materiale",field:"Materiale",headerFilterPlaceholder:"Materiale...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Proprietà",field:"Proprieta",headerFilterPlaceholder:"Proprietario...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Donatore",field:"Donatore",headerFilterPlaceholder:"Donatore...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Data donazione",field:"Data_donazione",headerFilterPlaceholder:"Data donazione...",align:"center",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",sorterParams:{alignEmptyValues:"bottom"},editor:"input",validator:["regex:\\d{4}-\\d{2}-\\d{2}"]},
-     	{title:"Stato",field:"Stato",headerFilterPlaceholder:"Stato...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input", editor:"select", editorParams:{values:["Buono","Usurato","Pessimo"]}},
-		{title:"Quantit&agrave;",field:"Quantita",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",headerFilterPlaceholder:"Quantità = ?",editor:"number",validator:["min:1", "max:99999", "integer"]},
-		{title:"Note",field:"Note",headerFilterPlaceholder:"Note...",sorter:"string",sorterParams:{alignEmptyValues:"bottom"},headerFilter:"input",editor:"input"},
-     	{title:"Valore",field:"Valore",sorter:"number",headerFilter:"number",headerFilterPlaceholder:"Valore = ?",headerFilterFunc:"=",editor:"number",validator:["min:0", "max:999999", "numeric"]},
-     	{title:"",field:"Link",cellClick:function(e, cell) { apriPaginaOggetto(cell); }}
+		{title:"ID",field:"ID",sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+		{title:"Codice",field:"Codice",editor:"input",sorter:"number",sorterParams:{alignEmptyValues:"bottom"},formatter:function(cell) {
+			let val = cell.getValue();
+			if(val) {
+				let cod_col = val.split(' ');
+				val = cod_col[0];
+				let colori = cod_col[1];
+				if(colori) {
+					colori = colori.split(',');
+					if(colori.length == 1)	cell.getElement().style.backgroundColor = colori[0];
+					else					cell.getElement().style.backgroundImage = `linear-gradient(to right, ${colori.join(', ')})`;
+				}
+			}
+			return val;
+		},cellEditing:function(cell){
+			let val = cell.getValue();
+			if(val) val = val.split(' ')[0];
+			cell.setValue(val);
+		}},
+     	{title:"Descrizione",field:"Descrizione",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Larghezza",field:"Larghezza",editor:"number",validator:["min:1", "max:99999", "integer"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Altezza",field:"Altezza",editor:"number",validator:["min:1", "max:99999", "integer"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Profondita",field:"Profondita",editor:"number",validator:["min:1", "max:99999", "integer"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Anno",field:"Anno",editor:"input",validator:["regex:\\d{4}(-\\d{4})?"],sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Materiale",field:"Materiale",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Proprietà",field:"Proprieta",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Donatore",field:"Donatore",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Data donazione",field:"Data_donazione",editor:"input",validator:["regex:\\d{4}-\\d{2}-\\d{2}"],sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Stato",field:"Stato",editor:"select",editorParams:{values:["Buono","Usurato","Pessimo"]},sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+		{title:"Ubicazione",field:"Ubicazione",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+		{title:"Quantit&agrave;",field:"Quantita",editor:"number",validator:["min:1", "max:99999", "integer"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+		{title:"Note",field:"Note",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Valore",field:"Valore",editor:"number",validator:["min:0", "max:999999", "numeric"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"",field:"Link",formatter:"link",formatterParams:{
+			label:"Altro",
+			url:function(cell) { return 'oggetto.php?id='+cell.getValue(); },
+			target:"_blank",
+		}}
      ]
 });
 
 /*********************CALL FUNCTIONS***********************/
+function tableLoading() {
+	$('#tabella').css('visibility', 'hidden');
+	$('#loading').show();
+	console.log('loading')
+}
+
+function tableLoaded() {
+	$('#tabella').css('visibility', 'visible');
+	$('#loading').hide();
+	console.log('loaded')
+}
+
 function printTable() {
 	table.getColumn('Link').hide();
 	table.print();
 	table.getColumn('Link').show();
 }
 
-function apriPaginaOggetto(cell) {
-	window.open('oggetto.php?id='+cell.getRow().getCell('ID').getValue(), '_blank');
-}
-
-function aggiornaTabella() {
-	//console.log(getFormAsJSON($("#form-aggiorna")));
+function aggiornaTabella(options = null) {
+	//console.log(options);
+	tableLoading();
 	$.ajax({
 		url: "runtime/handler.php",
 		type: "POST",
-		data: {request : "query"},
+		data: {request: "query", options: options},
 		dataType: "json",
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			console.log(textStatus);
@@ -135,19 +111,8 @@ function aggiornaTabella() {
 		}
 	}).done(function(result) {
 		//console.log(result);
-		for (var i = 0; i < result.length; i++)
-			 result[i].Link = "Altro";
-		 table.setData(result);
-		 for (var row of table.getRows()) {
-			let colori = row.getCell('Colori').getValue()
-			if(colori) {
-				colori = colori.split(',');
-				if(colori.length == 1)
-					row.getCell('Codice').getElement().style.backgroundColor = colori[0];
-				else
-					row.getCell('Codice').getElement().style.backgroundImage = `linear-gradient(to right, ${colori.join(', ')})`;
-			}
-		 }
+		table.setData(result);
+		tableLoaded();
 	});
 }
 
@@ -185,12 +150,84 @@ function newOggetto() {
 	});
 }
 
-/*********************EVENT HANDLERS***********************/
-$('#btnAggiornaTabella').click(function(){
-	$('#btnCollapseMenu').click();
-	aggiornaTabella();
-});
+/*********FILTRI********/
+var operatori = ['like','=','!=','<','<=','>','>='];
+var exclCols = ['Colori', 'Link'];
+function addFiltro() {
+	let colonna = $('<select name="colonna"></select>');
+	for (const col of table.getColumns())
+		if(!exclCols.includes(col.getField())) colonna.append($(`<option value="${col.getField()}">${col.getField()}</option>`));
 
+	let operatore = $('<select name="operatore"></select>');
+	for (const op of operatori)
+		operatore.append($(`<option value="${op}">${op}</option>`));
+
+	let valore = $('<input type="text" name="value" placeholder="Valore...">');
+
+	let elimina = $('<button style="margin-left: 30px;">Elimina</button>').click(function() { $(this).parent().remove(); });
+	
+	$('#navbar-targets > div[data-value="filtri"] ol').append($('<li></li>').append(colonna, operatore, valore, elimina));
+}
+
+var filtri = [];
+function applyFiltri() {
+	tableLoading();
+	filtri = [];
+	for(const fil of $('#navbar-targets > div[data-value="filtri"] > ol > li')) {
+		let tmp = $(fil).children('input[name="value"]').val();
+		let val = parseInt(tmp);
+		if(isNaN(val)) val = tmp;
+
+		filtri.push({
+			field: $(fil).children('select[name="colonna"]').val(),
+			type: $(fil).children('select[name="operatore"]').val(),
+			value: val
+		});
+	}
+		
+	table.setFilter(filtri);
+	tableLoaded();
+}
+
+function resetFiltri() {
+	tableLoading();
+	table.setFilter((filtri = []));
+	tableLoaded();
+}
+
+/*********ORDINAMENTI********/
+function addOrdinamento() {
+	let colonna = $('<select name="colonna"></select>');
+	for (const col of table.getColumns())
+		if(!exclCols.includes(col.getField())) colonna.append($(`<option value="${col.getField()}">${col.getField()}</option>`));
+	
+	let dir = $('<select name="dir"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select>');
+
+	let elimina = $('<button>Elimina</button>').click(function() { $(this).parent().remove(); });
+
+	$('#navbar-targets > div[data-value="ordinamenti"] ol').append($('<li></li>').append(colonna, dir, elimina));
+}
+
+var ordinamenti = [];
+function applyOrdinamenti() {
+	tableLoading();
+	ordinamenti = [];
+	for(const ord of $('#navbar-targets > div[data-value="ordinamenti"] > ol > li'))
+		ordinamenti.unshift({
+			column: $(ord).children('select[name="colonna"]').val(),
+			dir: $(ord).children('select[name="dir"]').val(),
+		});
+	table.setSort(ordinamenti);
+	tableLoaded();
+}
+
+function resetOrdinamenti() {
+	tableLoading();
+	table.setSort((ordinamenti = []));
+	tableLoaded();
+}
+
+/*********************EVENT HANDLERS***********************/
 $(`.colonna`).click(function() {
 	if(table.getColumn($(this).attr('name')).getVisibility())
 		table.getColumn($(this).attr('name')).hide();
@@ -199,9 +236,18 @@ $(`.colonna`).click(function() {
 	setColumnsPreferences();
 });
 
-$(window).focus(function(e) {
-	aggiornaTabella();
+$('#navbar > div').click(function() {
+	let target = $(this).data('target');
+	if(target)
+		$('#navbar-targets > div').each(function() {
+			if($(this).data('value') == target && $(this).css('display') != 'grid')
+				$(this).css('display','grid');
+			else
+				$(this).hide();
+		});
 });
+
+$(window).focus(function() { aggiornaTabella(); });
 
 /*********************INIT***********************/
 aggiornaTabella();

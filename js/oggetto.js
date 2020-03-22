@@ -50,6 +50,30 @@ $('#formElimina input[type=button]').click(function(e) {
 		$('#formElimina').submit();
 });
 
+var oldVal;
+$('#tabellaDati textarea').focusin(function() { oldVal = $(this).val(); });
+
+$('#tabellaDati textarea').focusout(function() {
+	let field = $(this);
+	let fields = $('#tabellaDati').children().filter(function() { return $(this).attr('name')?true:false; });
+	let data = {};
+	for (const el of fields)
+		data[$(el).attr('name')] = $(el).val()?$(el).val():$(el).text();
+
+	$.ajax({
+		url: "runtime/handler.php",
+		type: "POST",
+		data: {"request" : "updateOggetto", "oggetto" : data},
+		dataType: "text",
+		error: function(XMLHttpRequest, textStatus, errorThrown) { alert(textStatus); }
+	}).done(function(res) {
+		if(res != 'OK') {
+			alert(res);
+			field.val(oldVal);
+		}
+	});
+});
+
 /*********************CALL FUNCTIONS***********************/
 function createImageButton(n) {
 	let btn = $("<button></button>");
@@ -122,6 +146,28 @@ function removeSelectedIndex() {
 	
 	if(nImmagini == 0)
 		$('#btnRemoveImg').hide();
+}
+
+function prossimoOggetto() {
+	let params = {};
+	let url = window.location.href.split('?');
+	url[1] = url[1].split('&');
+	for (const param of url[1]) {
+		let tmp = param.split('=');
+		params[tmp[0]] = tmp[1];
+	}
+	window.location.href = (url[0]+'?id='+(parseInt(params.id)+1));
+}
+
+function precedenteOggetto() {
+	let params = {};
+	let url = window.location.href.split('?');
+	url[1] = url[1].split('&');
+	for (const param of url[1]) {
+		let tmp = param.split('=');
+		params[tmp[0]] = tmp[1];
+	}
+	window.location.href = (url[0]+'?id='+(parseInt(params.id)-1));
 }
 
 /*********************INIT***********************/

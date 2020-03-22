@@ -8,8 +8,12 @@ pre {
 	background-color: gray;
 }
 
+img {
+	max-width: 90%;
+}
+
 .hint-etichetta, .etichetta {
-	-webkit-text-fill-color: white; /* Will override color (regardless of order) */
+	-webkit-text-fill-color: white;
 	-webkit-text-stroke-width: 1px;
 	-webkit-text-stroke-color: black;
 	font-size: 1.5rem;
@@ -50,4 +54,9 @@ pre {
 
 div::-webkit-scrollbar {
 	display: none;
+}
+
+#tabellaDati {
+	display: grid;
+	grid-template-columns: 1fr 2fr;
 }
