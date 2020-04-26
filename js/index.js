@@ -65,7 +65,7 @@ table = new Tabulator("#tabella", {
      	{title:"Proprietà",field:"Proprieta",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
      	{title:"Donatore",field:"Donatore",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
      	{title:"Data donazione",field:"Data_donazione",editor:"input",validator:["regex:\\d{4}-\\d{2}-\\d{2}"],sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
-     	{title:"Stato",field:"Stato",editor:"select",editorParams:{values:["Buono","Usurato","Pessimo"]},sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
+     	{title:"Stato",field:"Stato",editor:"select",editorParams:{values:["Ottimo","Buono","Usurato","Pessimo"]},sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
 		{title:"Ubicazione",field:"Ubicazione",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
 		{title:"Quantit&agrave;",field:"Quantita",editor:"number",validator:["min:1", "max:99999", "integer"],sorter:"number",sorterParams:{alignEmptyValues:"bottom"}},
 		{title:"Note",field:"Note",editor:"input",sorter:"string",sorterParams:{alignEmptyValues:"bottom"}},
