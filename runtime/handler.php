@@ -48,12 +48,28 @@ switch($_POST['request']??'') {
 		exit();
 		
 	case 'removeImage':
-		$res = $c->db->dml(
-			'DELETE FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ? AND Immagine = ?',
+		//Only reference?
+		$moveImg = $c->db->ql('SELECT COUNT(DISTINCT Oggetto) AS c 
+								FROM '.$c->getNameTableImmagini().'  
+								WHERE Oggetto <> ? AND Immagine = ?',
+								[$_POST['oggetto'], $_POST['immagine']])[0]['c'] <= 0;
+
+		$res = $c->db->dml('DELETE FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ? AND Immagine = ? ',
 			[$_POST['oggetto'], $_POST['immagine']]);
+
 		if ($res->errorCode() == 0) {
 			echo 'OK';
-			unlink(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.$c->ini['imgsDir'].DIRECTORY_SEPARATOR.$_POST['immagine']);
+			$path = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+			if($moveImg) {
+				$trash = $c->ini['paths']['imgsTrashDir'];
+				$imgs = $c->ini['paths']['imgsDir'];
+				$c = 0;
+				do {
+					$newName = $path.$trash.DIRECTORY_SEPARATOR.($c++).'_'.$_POST['immagine'];
+				}while(file_exists($newName));
+
+				rename($path.$imgs.DIRECTORY_SEPARATOR.$_POST['immagine'], $newName);
+			}
 		}else
 			echo $res->errorInfo()[2];
 		exit();

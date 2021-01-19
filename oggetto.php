@@ -4,6 +4,26 @@
 
 	if(!$c->isLogged()) $c->redirect('login.php');
 
+	//Funzione di utilità
+	if(isset($_GET['fixImgsNames'])) {
+		$res = $c->db->ql('SELECT * FROM '.$c->getNameTableImmagini());
+		$imgsPath = $c->ini['paths']['imgsDir'].DIRECTORY_SEPARATOR;
+		foreach ($res as $row) {
+			$oggetto = $row['Oggetto'];
+			$immagine = $row['Immagine'];
+			if(explode('_', $immagine)[0] != $oggetto) {
+				$ext = pathinfo($imgsPath.$immagine, PATHINFO_EXTENSION);
+				$newName = $c->getNextImgName($oggetto).".$ext";
+				echo "Moving ($oggetto, $immagine) to ($oggetto, $newName)<br>";
+				var_dump($c->db->dml('INSERT INTO '.$c->getNameTableImmagini().' VALUES (?,?)', [$oggetto, $newName])->errorInfo()[2]);
+				var_dump($c->db->dml('DELETE FROM '.$c->getNameTableImmagini().' WHERE Oggetto = ? AND Immagine = ?', [$oggetto, $immagine])->errorInfo()[2]);
+				//var_dump($c->db->dml('UPDATE '.$c->getNameTableImmagini()." SET Immagine = '$newName' WHERE Oggetto = $oggetto")->errorInfo()[2]);
+				rename($imgsPath.$immagine, $imgsPath.$newName);
+			}
+		}
+		exit();
+	}
+
 	if(isset($_REQUEST['id']))
 		$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' WHERE ID = ?', [$_REQUEST['id']]);
 		
@@ -22,16 +42,23 @@
 	}
 	
 	if(isset($_FILES['image'])) {
-		$moved = move_uploaded_file(
+		try{
+			$ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+			$fileName = $c->getNextImgName($_REQUEST['id']).".$ext";
+			$moved = move_uploaded_file(
 				$_FILES['image']['tmp_name'],
-				$c->ini['imgsDir'].'/'.$_FILES['image']['name']);
-		if(!$moved)
-			echo 'Not uploaded because of error #'.$_FILES['image']['error'];
-
-		$res = $c->db->dml(
-				'INSERT INTO '.$c->getNameTableImmagini().'(Oggetto, Immagine) VALUES(?,?)',
-				[$_POST['id'], $_FILES['image']['name']]);
-		echo ($res->errorCode() == 0) ? '' : '<pre>'.$res->errorInfo()[2].'</pre>';
+				$c->ini['paths']['imgsDir'].'/'.$fileName);
+			if(!$moved)
+				echo 'Not uploaded because of error #'.$_FILES['image']['error'];
+			else {
+				$res = $c->db->dml(
+					'INSERT INTO '.$c->getNameTableImmagini().'(Oggetto, Immagine) VALUES(?,?)',
+					[$_POST['id'], $fileName]);
+				echo ($res->errorCode() == 0) ? '' : '<pre>'.$res->errorInfo()[2].'</pre>';
+			}
+		}catch(Exception $e) {
+			var_dump($e);
+		}
 	}
 	if(!empty($_POST['etichetta']??NULL)) {
 		$res = $c->db->dml(
@@ -61,9 +88,14 @@
 		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	
-		<script type="text/javascript" src="lib/jquery-3.4.1.min.js"></script>
+		<!-- JQUERY -->
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+  				integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+  				crossorigin="anonymous"></script>
+
 		<script type="text/javascript" src="lib/jscolor.js"></script>
 
+		<!-- OGGETTO -->
 		<script defer type="text/javascript" src="./js/misc.js"></script>
 		<script defer type="text/javascript" src="./js/oggetto.js"></script>
 		<link href='./css/oggetto.css' rel='stylesheet' type='text/css'>
@@ -115,7 +147,7 @@
 									<?php
 									$i = 0;
 									foreach ($immagini as $immagine)
-										echo '<img id="img_'.($i++).'" class="immagine" src="'.$c->ini['imgsDir'].'/'.$immagine['i'].'">';
+										echo '<img id="img_'.($i++).'" class="immagine" src="'.$c->ini['paths']['imgsDir'].'/'.$immagine['i'].'">';
 									?>
 								</div>
 							</div>

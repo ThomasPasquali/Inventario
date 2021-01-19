@@ -90,13 +90,6 @@ var gridOptions = {
   },*/
 }
 
-
-$(document).ready(async function() {
-    grid = new agGrid.Grid($('#table')[0], gridOptions);
-    refreshTableData();
-    gridOptions.columnApi.autoSizeColumns(['ID', 'Codice', 'Larghezza', 'Altezza', 'Profondita', 'Anno', 'Data_donazione', 'Stato', 'Ubicazione', 'Quantita', 'Valore']);
-});
-
 /*************HANDLERS**************/
 
 //Eventi menù
@@ -109,6 +102,15 @@ $('#navbar > div').click(function() {
 			else
 				$(this).hide();
 		});
+});
+
+//Refresh on focus
+$(window).focus(function() { refreshTableData(); });
+
+$(document).ready(async function() {
+    grid = new agGrid.Grid($('#table')[0], gridOptions);
+    refreshTableData();
+    gridOptions.columnApi.autoSizeColumns(['ID', 'Codice', 'Larghezza', 'Altezza', 'Profondita', 'Anno', 'Data_donazione', 'Stato', 'Ubicazione', 'Quantita', 'Valore']);
 });
 
 /*************FUNCIONS**************/

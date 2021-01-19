@@ -12,15 +12,15 @@ class Controls {
 	
 	function __construct() {
 		session_start();
-		$this->ini = parse_ini_file(INI_FILE_PATH, true)['db'];
-		$this->db = new DB($this->ini['host'], $this->ini['port'], $this->ini['username'], $this->ini['password'], $this->ini['dbName']);
-		$this->schema = $this->ini['dbName'];
-		$this->tableOggetti = $this->ini['tabOggetti'];
-		$this->tableUtenti = $this->ini['tabUtenti'];
-		$this->tableImmagini = $this->ini['tabImmagini'];
-		$this->tableEtichette = $this->ini['tabEtichette'];
-		$this->tableEtichetteOggetti = $this->ini['tabEtichetteOggetti'];
-		$this->viewOggetti = $this->ini['viewOggetti'];
+		$this->ini = parse_ini_file(INI_FILE_PATH, true);
+		$this->db = new DB($this->ini['db']['host'], $this->ini['db']['port'], $this->ini['db']['username'], $this->ini['db']['password'], $this->ini['db']['dbName']);
+		$this->schema = $this->ini['db']['dbName'];
+		$this->tableOggetti = $this->ini['db']['tabOggetti'];
+		$this->tableUtenti = $this->ini['db']['tabUtenti'];
+		$this->tableImmagini = $this->ini['db']['tabImmagini'];
+		$this->tableEtichette = $this->ini['db']['tabEtichette'];
+		$this->tableEtichetteOggetti = $this->ini['db']['tabEtichetteOggetti'];
+		$this->viewOggetti = $this->ini['db']['viewOggetti'];
 	}
 	
 	public function redirect($where) {
@@ -136,6 +136,11 @@ class Controls {
 	public function getJSforAlerts(){
 		if(!empty($this->alerts))
 			return '<script>$(document).ready(function() {'.implode(' ', $this->alerts).'});</script>';
+	}
+
+	public function getNextImgName($idOggetto) {
+		$res = $this->db->ql('SELECT COUNT(*)  AS c FROM immagini_oggetti WHERE Oggetto = ? AND SUBSTRING_INDEX(Immagine , "_", 1) = ?', [$idOggetto, $idOggetto]);
+		return $idOggetto.'_'.(intval($res[0]['c'])+1);
 	}
 	
 }
