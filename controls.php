@@ -12,7 +12,7 @@ class Controls {
 	
 	function __construct() {
 		session_start();
-		$this->ini = parse_ini_file(INI_FILE_PATH);
+		$this->ini = parse_ini_file(INI_FILE_PATH, true)['db'];
 		$this->db = new DB($this->ini['host'], $this->ini['port'], $this->ini['username'], $this->ini['password'], $this->ini['dbName']);
 		$this->schema = $this->ini['dbName'];
 		$this->tableOggetti = $this->ini['tabOggetti'];

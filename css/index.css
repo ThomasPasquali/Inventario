@@ -84,3 +84,7 @@ div.tabulator-cell[tabulator-field="Codice"] {
 div[tabulator-field="Link"] a {
 	color:white;
 }
+
+#table {
+	height: 96%;
+}

@@ -70,7 +70,8 @@ switch($_POST['request']??'') {
 		exit();
 
 	case 'newOggetto':
-		$res = $c->db->dml('INSERT INTO oggetti VALUES ()');
+		$code = $c->db->ql('SELECT MAX(Codice)+1 Code FROM '.$c->getNameTableOggetti())[0]['Code'];
+		$res = $c->db->dml('INSERT INTO '.$c->getNameTableOggetti()."(Codice) VALUES ($code)");
 		if($res->errorCode() == 0) {
 			$oggetto = $c->db->ql('SELECT * FROM '.$c->getNameTableOggetti().' ORDER BY ID DESC LIMIT 1')[0];
 			$oggetto['Link'] = 'Altro';
