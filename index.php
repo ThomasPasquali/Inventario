@@ -23,11 +23,9 @@
 
     <body>
         <div id="navbar" class="h-spaced-flex">
-			<div data-target="ricerca"><h1>Ricerca WIP</h1></div>
-			<div data-target="filtri"><h1>Filtri WIP</h1></div>
-			<div data-target="ordinamenti"><h1>Ordinamenti WIP</h1></div>
-			<div data-target="colonne"><h1>Colonne WIP</h1></div>
-			<div data-target="report"><h1>Report WIP</h1></div>
+			<!-- <div data-target="ricerca"><h1>Etichette</h1></div> -->
+			<div data-target="colonne"><h1>Colonne</h1></div>
+			<div data-target="report"><h1>Report</h1></div>
 			<div><h1 onclick="newOggetto();">Nuovo oggetto</h1></div>
             <div data-target="readme"><h1>Readme</h1></div>
 			<div>
@@ -39,40 +37,31 @@
 		</div>
 
 		<div id="navbar-targets">
-			<div data-value="ricerca">
-				<h1>Oggetti per etichetta</h1>
+			<!-- <div data-value="ricerca">
+				<h1>Filtra oggetti per etichetta</h1>
 				<select name="etichetta">
 				<?php
-					$etichette = $c->db->ql('SELECT * FROM etichette');
+					/*$etichette = $c->db->ql('SELECT * FROM etichette');
 					foreach($etichette as $e)
-						echo '<option value="'.$e['ID'].'" style="background-color: #'.$e['Colore'].';">'.$e['Nome'].'</option>';
+						echo '<option value="'.$e['ID'].'" style="background-color: #'.$e['Colore'].';">'.$e['Nome'].'</option>';*/
 				?>
 				</select>
 				<div class="h-spaced-flex">
-					<button onclick="aggiornaTabella({etichetta:$(this).parent().parent().children('select').val()});">Cerca oggetti per etichetta</button>
-					<button onclick="aggiornaTabella();">Reset</button>
+					<button onclick="refreshTableData({etichetta:$(this).parent().parent().children('select').val()});">Cerca oggetti per etichetta</button>
+					<button onclick="refreshTableData();">Reset</button>
 				</div>
-			</div>
-			<div data-value="filtri">
-				<ol></ol>
-				<div class="h-spaced-flex">
-					<button onclick="applyFiltri();">Applica</button>
-					<button onclick="resetFiltri();">Reset</button>
-					<button onclick="addFiltro();">Aggiungi filtro</button>
-				</div>
-			</div>
-			<div data-value="ordinamenti">
-				<ol></ol>
-				<div class="h-spaced-flex">
-					<button onclick="applyOrdinamenti();">Applica</button>
-					<button onclick="resetOrdinamenti();">Reset</button>
-					<button onclick="addOrdinamento();">Aggiungi ordinamento</button>
-				</div>
-			</div>
+			</div> -->
 			<div data-value="colonne">
+				<?php
+					$cols = $c->describeTable($c->getNameTableOggetti());
+					$prefCols = $c->getPreferenza('columns');
+					foreach($cols as $col)
+						echo "<div><input type=\"checkbox\" name=\"$col[Field]\" ".(is_null($prefCols)||in_array($col['Field'], $prefCols)?'checked="checked"':'')." class=\"colonna\" id=\"col$col[Field]\"><label for=\"col$col[Field]\">$col[Field]</label></div>";
+				?>
 			</div>
 			<div data-value="report">
-				<button type="button" onclick="printTable();">Stampa dati tabella</button>
+				<button type="button" onclick="setForPrint();">Stampa</button>
+				<button type="button" onclick="exportCSV();">Esporta in CSV</button>
 			</div>
             <div data-value="readme">
                 <h3>Azioni:</h3>

@@ -2,19 +2,19 @@ var columnDefs = [
     //{field:"Colori"},
     {field:"ID", editable: false},
     {field:"Codice"},
-    {field:"Descrizione"},
+    {field:"Descrizione", filter: 'agTextColumnFilter'},
     {field:"Larghezza"},
     {field:"Altezza"},
     {field:"Profondita"},
-    {field:"Anno"},
-    {field:"Materiale"},
-    {field:"Proprieta"},
-    {field:"Donatore"},
-    {field:"Data_donazione"},
-    {field:"Stato"},
-    {field:"Ubicazione"},
+    {field:"Anno", filter: 'agTextColumnFilter'},
+    {field:"Materiale", filter: 'agTextColumnFilter'},
+    {field:"Proprieta", filter: 'agTextColumnFilter'},
+    {field:"Donatore", filter: 'agTextColumnFilter'},
+    {field:"Data_donazione", filter: 'agDateColumnFilter'},
+    {field:"Stato", filter: 'agTextColumnFilter'},
+    {field:"Ubicazione", filter: 'agTextColumnFilter'},
     {field:"Quantita"},
-    {field:"Note"},
+    {field:"Note", filter: 'agTextColumnFilter'},
     {field:"Valore"},
     //{field:"Link"}
   ];
@@ -25,6 +25,7 @@ var gridOptions = {
         sortable: true,
         resizable: true,
         editable: true,
+        filter: 'agNumberColumnFilter',
         comparator: function(valueA, valueB, nodeA, nodeB, isInverted) {
             if(parseInt(valueA)&&parseInt(valueB))
                 return parseInt(valueA) - parseInt(valueB);
@@ -64,30 +65,7 @@ var gridOptions = {
 				alert('Errore durante la modifica');
     		}
     	});
-    },
-    /*
-    sideBar: {
-    toolPanels: [
-      {
-        id: 'columns',
-        labelDefault: 'Columns',
-        labelKey: 'columns',
-        iconKey: 'columns',
-        toolPanel: 'agColumnsToolPanel',
-        toolPanelParams: {
-          suppressRowGroups: true,
-          suppressValues: true,
-          suppressPivots: true,
-          suppressPivotMode: true,
-          suppressSideButtons: true,
-          suppressColumnFilter: true,
-          suppressColumnSelectAll: true,
-          suppressColumnExpandAll: true,
-        },
-      },
-    ],
-    defaultToolPanel: 'columns',
-  },*/
+    }
 }
 
 /*************HANDLERS**************/
@@ -107,15 +85,33 @@ $('#navbar > div').click(function() {
 //Refresh on focus
 $(window).focus(function() { refreshTableData(); });
 
+//Columns handled
+$('.colonna').on('change', function() {
+    //Non il massimo ma limita lo spreco
+    if(gridOptions.columnApi.getColumn($(this).attr('name')).visible != $(this).is(':checked'))
+        setColumnsPreferences();
+    gridOptions.columnApi.applyColumnState({
+        state: [{
+            colId: $(this).attr('name'),
+            hide: (!$(this).is(':checked'))
+        }]
+    });
+});
+
 $(document).ready(async function() {
     grid = new agGrid.Grid($('#table')[0], gridOptions);
     refreshTableData();
     gridOptions.columnApi.autoSizeColumns(['ID', 'Codice', 'Larghezza', 'Altezza', 'Profondita', 'Anno', 'Data_donazione', 'Stato', 'Ubicazione', 'Quantita', 'Valore']);
+    
+    //Columns init
+    $('.colonna').each(function() {
+        $(this).trigger('change');
+    });
 });
 
 /*************FUNCIONS**************/
-async function refreshTableData() {
-    data = await getData();
+async function refreshTableData(params) {
+    data = await getData(params);
     gridOptions.api.setRowData(data);
 }
 
@@ -150,4 +146,36 @@ function newOggetto() {
             });
         }
 	});
+}
+
+function setForPrint() {
+    $('#navbar').hide();
+    $('#navbar-targets').hide();
+    gridOptions.api.setDomLayout('print');
+    window.print();
+    gridOptions.api.setDomLayout(null);
+    $('#navbar-targets').show();
+    $('#navbar').show();
+}
+
+function exportCSV() {
+    gridOptions.api.exportDataAsCsv();
+}
+
+function setColumnsPreferences() {
+	let cols = [];
+	$('.colonna:checked').each(function() {
+		cols.push($(this).attr('name'));
+	});
+	if(cols.length > 0)
+		$.ajax({
+			url: "runtime/handler.php",
+			type: "POST",
+			data: {request : "setPreference", name : 'columns', value : cols},
+			dataType: "text",
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				console.log(textStatus);
+				console.log(errorThrown);
+			}
+		});
 }

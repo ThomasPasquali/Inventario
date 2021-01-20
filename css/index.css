@@ -9,7 +9,7 @@
 body {
 	background: var(--bg-1);
 	padding: 10px;
-	font-family: 'proxima nova', 'helvetica neue';
+	font-family: Arial, Helvetica, serif;
 	font-size: 1.1rem;
 }
 
@@ -52,17 +52,17 @@ body {
 	width: fit-content;
 }
 
-#navbar-targets > div[data-value="filtri"] {
-	grid-template-columns: auto;
-}
-
 #navbar-targets > div[data-value="colonne"] {
 	grid-template-columns: repeat(4, auto);
 }
 
-div.tabulator-cell[tabulator-field="Codice"] {
-	--border-color: #000000;
-	text-shadow: 2px 0 0 var(--border-color), -2px 0 0 var(--border-color), 0 2px 0 var(--border-color), 0 -2px 0 var(--border-color), 1px 1px var(--border-color), -1px -1px 0 var(--border-color), 1px -1px 0 var(--border-color), -1px 1px 0 var(--border-color);
+#navbar-targets > div[data-value="report"] {
+	grid-template-columns: repeat(2, auto);
+}
+
+#navbar-targets > div[data-value="readme"] * {
+	margin: 0;
+	padding: 0;
 }
 
 .elements-centered {
